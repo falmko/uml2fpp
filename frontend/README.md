@@ -10,10 +10,11 @@
 - 支持导出
 
 ## 技术栈
-
 - UML 绘图: JointJS
 - XML 处理: xml2js
 
-## 演示
-
-![alt text](assert/image.png)
+## 运行
+```bash
+npm install
+npm run dev
+```

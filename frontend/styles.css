@@ -1,0 +1,61 @@
+#paper {
+    position: absolute;
+    top: 0;
+    right: 20%;
+    bottom: 0;
+    left: 300px;
+}
+
+#stencil {
+    position: absolute;
+    top: 0;
+    width: 300px;
+    bottom: 0;
+    left: 0;
+}
+
+#toolbar {
+    position: absolute;
+    top: 15px;
+    right: 200px;
+}
+
+#toolbar .joint-toolbar {
+    padding: 5px;
+}
+
+#inspector {
+    background: #333;
+    position: absolute;
+    width: 20%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.inspector-tab {
+    position: relative;
+    height: calc(100% - 30px);
+}
+
+.inspector-tab-button {
+    background: #414548;
+    color: #fff;
+    height: 30px;
+    border: none;
+}
+
+.inspector-tab-button.active {
+    background: #5e6366;
+}
+
+.group[data-name="name"] .group-label,
+.field[data-field="attributes"]>label,
+.field[data-field="operations"]>label {
+    display: none;
+}
+
+.joint-inspector {
+    padding: 5px 0 0 0;
+}
