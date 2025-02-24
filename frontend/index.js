@@ -4,18 +4,28 @@ import './joint-plus.css';
 import './styles.css';
 import { UMLClass, typeOptions } from './shapes/shapes'
 import { Telemetry } from './shapes/telemetry';
-import { Log } from './shapes/log';
+import { Events } from './shapes/events';
 import { Severity } from './models/event';
-import { Dependency } from './shapes/link';
+import { Composition } from './shapes/link';
+import { ComponentBase } from './shapes/compoent_base';
+import { Parameters } from './shapes/parameters';
+import { Commands } from './shapes/commands';
+import { CommandKind } from './models/command';
 
 // const namespace = { ...shapes, myNamespace: { UMLClass } };
 shapes.UMLClass = UMLClass;
 shapes.UMLClassView = shapes.standard.HeaderedRecordView;
 shapes.Telemetry = Telemetry;
 shapes.TelemetryView = shapes.standard.HeaderedRecordView;
-shapes.Log = Log;
+shapes.Events = Events;
 shapes.LogView = shapes.standard.HeaderedRecordView;
-shapes.Dependency = Dependency;
+shapes.Composition = Composition;
+shapes.ComponentBase = ComponentBase;
+shapes.ComponentBaseView = shapes.standard.HeaderedRecordView;
+shapes.Parameters = Parameters;
+shapes.ParametersView = shapes.standard.HeaderedRecordView;
+shapes.Commands = Commands;
+shapes.CommandsView = shapes.standard.HeaderedRecordView;
 
 const graph = new dia.Graph({}, { cellNamespace: shapes })
 
@@ -36,9 +46,17 @@ const paper = new dia.Paper({
     sorting: dia.Paper.sorting.APPROX,
     background: { color: "#F3F7F6" },
     defaultLink: (cellView, magnet) => {
-        return new shapes.Dependency();
+        return new shapes.Composition();
     },
-    defaultRouter: { name: 'orthogonal' },
+    defaultRouter: { 
+        name: 'normal',
+        args: {
+            padding: 40,
+            excludeTypes: ['link'],
+            directions: ['left', 'right', 'top', 'bottom'],
+            cost: 'manhattan'
+        }
+    },
     defaultConnector: { name: 'straight', args: { cornerType: 'line' } },
     defaultConnectionPoint: { name: "boundary" },
     clickThreshold: 10,
@@ -64,13 +82,13 @@ const paper = new dia.Paper({
         // 如果源是UMLClass（且不是端口连接）
         if (sourceModel instanceof shapes.UMLClass) {
             // 目标必须是Log或Telemetry，且不能是端口连接
-            return (targetModel instanceof shapes.Log ||
+            return (targetModel instanceof shapes.Events ||
                 targetModel instanceof shapes.Telemetry) &&
                 !targetMagnet;  // 确保目标不是端口
         }
 
         // 如果源是Log或Telemetry，不允许作为连接的起点
-        if (sourceModel instanceof shapes.Log ||
+        if (sourceModel instanceof shapes.Events ||
             sourceModel instanceof shapes.Telemetry) {
             return false;
         }
@@ -160,55 +178,116 @@ stencil.render();
 stencilContainerEl.appendChild(stencil.el);
 
 const stencilElements = [
+
+    // 添加 ComponentBase 配置
     {
-        type: "standard.Rectangle",
-        size: { width: 80, height: 60 },
-        attrs: {
-            body: {
-                fill: "#80ffd5"
-            }
-        }
+        type: 'ComponentBase',
+        size: { width: 300 },
+        name: "Component",
+        className: "ComponentClass",
+        classType: "Component",
+        namespace: "Example",
+        kind: 2,
+        modeler: false
     },
+    // 添加 Parameters 配置
     {
-        type: "standard.Rectangle",
-        size: { width: 80, height: 60 },
-        attrs: {
-            body: {
-                rx: 10,
-                ry: 10,
-                fill: "#48cba4"
-            }
-        }
-    },
-    {
-        type: 'UMLClass',
-        size: { width: 200 },
-        name: "UML Class",
-        className: "ClassName",
-        classType: "ClassType",
-        outlineColor: "#ff9580",
-        color: "#ffeae5",
-        headerColor: "#ffd4cc",
-        textColor: "#002b33",
+        type: 'Parameters',
+        size: { width: 300 },
+        name: "Parameters",
+        className: "ParametersClass",
+        classType: "Parameters",
+        color: "#E0F7FA",
+        headerColor: "#B2EBF2",
+        outlineColor: "#00ACC1",
+        textColor: "#006064",
         itemHeight: 25,
-        attributes: [
+        parameter_base: 0,
+        opcode_base: 0,
+        parameters: [
             {
-                visibility: "-",
-                name: "parameter",
-                returnType: 2,
-                isStatic: false
+                id: 0,
+                name: "example",
+                data_type: 0,
+                size: 1,
+                default: "0",
+                comment: "Example parameter",
+                set_opcode: 0,
+                save_opcode: 1
             }
-        ],
-        operations: [
+        ]
+    },
+    // 添加 Events 配置
+    {
+        type: 'Events',
+        size: { width: 300 },
+        name: "Events",
+        className: "EventsClass",
+        classType: "Events",
+        color: "#F3E5F5",
+        headerColor: "#E1BEE7",
+        outlineColor: "#7B1FA2",
+        textColor: "#4A148C",
+        itemHeight: 25,
+        events: [
+            {
+                id: 0,
+                name: "exampleEvent",
+                severity: "DIAGNOSTIC",
+                format_string: "Example event occurred",
+                args: []
+            }
+        ]
+    },
+    // 添加 Commands 配置
+    {
+        type: 'Commands',
+        size: { width: 300 },
+        name: "Commands",
+        className: "CommandsClass",
+        classType: "Commands",
+        color: "#E8F5E9",
+        headerColor: "#C8E6C9",
+        outlineColor: "#43A047",
+        textColor: "#1B5E20",
+        itemHeight: 25,
+        opcode_base: 0,
+        commands: [
+            {
+                mnemonic: "EXAMPLE_CMD",
+                opcode: 0,
+                kind: "SYNC",
+                args: []
+            }
+        ]
+    },
+    // 添加 Telemetry 配置
+    {
+        type: 'Telemetry',
+        size: { width: 300 },
+        name: "Telemetry",
+        className: "TelemetryClass",
+        classType: "Telemetry",
+        color: "#E1F5FE",
+        headerColor: "#B3E5FC",
+        outlineColor: "#0288D1",
+        textColor: "#01579B",
+        itemHeight: 25,
+        telemetry_base: 0,
+        channels: [
             {
                 visibility: "+",
-                name: "command",
-                returnType: 4,
-                parameters: [],
-                isStatic: false
+                id: 0,
+                name: "example",
+                data_type: 0,
+                size: 1,
+                update_type: 0,
+                abbrev: "ex",
+                format_string: "%d",
+                comment: "Example channel"
             }
-        ],
-    }
+        ]
+    },
 ];
 
 // Every stencil port element has to have a `port` property.
@@ -269,7 +348,7 @@ stencil.load({
 });
 
 let portIdCounter = 1;
-
+// TODO 自定义port和port显示内容，属性编辑
 function addElementPort(element, port, position) {
     const portId = `P-${portIdCounter++}`;
     element.addPort({
@@ -582,15 +661,10 @@ const Ports = dia.ToolView.extend({
 });
 
 
-
-
 // CommandManager
 const commandManager = new dia.CommandManager({
     graph: graph,
 });
-
-
-
 
 // ToolBar
 // -------
@@ -621,7 +695,7 @@ const toolbar = new ui.Toolbar({
 toolbarContainerEl.appendChild(toolbar.render().el);
 toolbar.on('xml:pointerclick', () => {
     // TODO Export UML diagram to XML
-    console.log('Export XML clicked');
+    console.Events('Export XML clicked');
 });
 
 
@@ -637,8 +711,6 @@ function openHalo(cellView) {
 paper.on('cell:pointerup', (cellView) => {
     openHalo(cellView);
 });
-
-
 
 
 
@@ -680,9 +752,6 @@ paper.on('blank:pointerdown', async () => {
 // TODO add inspector
 
 
-
-
-
 // Keyboard
 // --------
 // TODO Keyboard shortcuts
@@ -692,6 +761,14 @@ const keyboard = new ui.Keyboard;
 keyboard.on('ctrl+c', () => clipboard.copyElements(selection.collection, paper.model));
 keyboard.on('ctrl+x', () => clipboard.cutElements(selection.collection, paper.model));
 keyboard.on('ctrl+v', () => clipboard.pasteCells(paper.model));
+keyboard.on('ctrl+a', (evt) => {
+    // 阻止浏览器默认的全选行为
+    evt.preventDefault();
+    // 获取图上所有元素
+    const elements = graph.getElements();
+    // 将所有元素添加到选择集合中
+    selection.collection.reset(elements);
+});
 keyboard.on('delete', () => {
     // 获取当前选中的所有元素并转换为数组
     const cells = selection.collection.toArray();
@@ -700,81 +777,6 @@ keyboard.on('delete', () => {
     // 清空选择集合
     selection.collection.reset();
 });
-
-
-
-// Example graph
-// -------------
-graph.addCells([
-    {
-        ...stencilElements[2],
-        id: "r1",
-        position: { x: 40, y: 100 },
-        size: { width: 200, height: 200 }
-    }
-]);
-const r1 = graph.getCell("r1");
-const r1p1 = addElementPort(r1, stencilPorts[0].port, { x: "100%", y: 20 });
-const r1p2 = addElementPort(r1, stencilPorts[0].port, { x: "0%", y: 60 });
-const telemetry = new Telemetry({
-    position: { x: 300, y: 100 },
-    size: { width: 300 },  // 移除固定高度，让它自动计算
-    telemetry_base: 100,
-    className: "telemetry_example",
-    classType: "telemetry",  // 添加这行
-    channels: [
-        {
-            visibility: "+",
-            id: 1,
-            name: "channel1",
-            data_type: 0,
-            size: 1,
-            update_type: 0,
-            abbrev: "ch1",
-            format_string: "",
-            comment: "Test channel"
-        },
-        {
-            visibility: "+",
-            id: 2,
-            name: "channel2",
-            data_type: 8,
-            size: 1,
-            update_type: 1,
-            abbrev: "ch2",
-            format_string: "",
-            comment: "Another test channel"
-        }
-    ]
-});
-graph.addCells([telemetry]);
-// 创建 Log 实例
-const log = new Log({
-    position: { x: 500, y: 100 },
-    size: { width: 300 },
-    className: "SystemLog",
-    classType: "log",
-    events: [
-        {
-            id: 1,
-            name: "StartupComplete",
-            severity: Severity.ACTIVITY_HI,
-            format_string: "System startup completed",
-            args: []
-        },
-        {
-            id: 2,
-            name: "ConfigError",
-            severity: Severity.WARNING_HI,
-            format_string: "Configuration error: %s",
-            args: [
-                { name: "errorMsg", type: "string" }
-            ]
-        }
-    ]
-});
-
-graph.addCells([log]);
 
 const visibilityOptions = [
     {

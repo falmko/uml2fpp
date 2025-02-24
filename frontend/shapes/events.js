@@ -7,11 +7,11 @@ export const severityOptions = Object.entries(Severity).map(([key, value]) => ({
     content: value
 }));
 
-export class Log extends UMLClass {
+export class Events extends UMLClass {
     defaults() {
         return {
             ...super.defaults(),
-            type: "Log",
+            type: "Events",
             color: "#F3E5F5",  // 浅紫色背景
             headerColor: "#E1BEE7",  // 深紫色头部
             outlineColor: "#7B1FA2",  // 紫色边框
@@ -20,7 +20,7 @@ export class Log extends UMLClass {
             itemHeight: 25,
             padding: { top: 40, left: 10, right: 10, bottom: 10 },
             events: [],  // Event 数组
-            classType: "log",
+            classType: "Events",
             className: ""
         };
     }
@@ -32,7 +32,7 @@ export class Log extends UMLClass {
             outlineColor,
             textColor,
             headerColor,
-            classType = "log",
+            classType = "Events",
             className = "",
             events = []
         } = this.attributes;
@@ -124,5 +124,24 @@ export class Log extends UMLClass {
                 }
             ]]
         }, opt);
+    }
+
+    getProperties() {
+        const {
+            events = []
+        } = this.attributes;
+
+        // 转换事件列表，添加可读的严重程度名称
+        const convertedEvents = events.map(event => ({
+            ...event,
+            // 添加严重程度的可读名称
+            severity_name: Severity[event.severity] || 'unknown',
+            // 保留原始值
+            severity: event.severity
+        }));
+
+        return {
+            events: convertedEvents
+        };
     }
 }

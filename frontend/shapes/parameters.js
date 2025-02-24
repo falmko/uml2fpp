@@ -1,43 +1,25 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
 import { UMLClass } from './shapes';
+import { fppTypeOptions } from './telemetry';
 
-export const updateTypeOptions = [
-    { value: 0, content: "always" },
-    { value: 1, content: "on_change" }
-];
-
-export const fppTypeOptions = [
-    { value: 0, content: "U8" },
-    { value: 1, content: "I8" },
-    { value: 2, content: "U16" },
-    { value: 3, content: "I16" },
-    { value: 4, content: "U32" },
-    { value: 5, content: "I32" },
-    { value: 6, content: "U64" },
-    { value: 7, content: "I64" },
-    { value: 8, content: "F32" },
-    { value: 9, content: "F64" },
-    { value: 10, content: "bool" },
-    { value: 11, content: "string" }
-];
-
-export class Telemetry extends UMLClass {
+export class Parameters extends UMLClass {
     defaults() {
         return {
             ...super.defaults(),
-            type: "Telemetry",
-            color: "#E1F5FE",
-            headerColor: "#B3E5FC",
-            outlineColor: "#0288D1",
-            textColor: "#01579B",
+            type: "Parameters",
+            color: "#E0F7FA",
+            headerColor: "#B2EBF2",
+            outlineColor: "#00ACC1",
+            textColor: "#006064",
             size: { width: 300, height: 0 },
-            itemHeight: 25, // 添加这行
-            padding: { top: 40, left: 10, right: 10, bottom: 10 }, // 添加这行
-            
-            /* 遥测属性 */
-            telemetry_base: 0,
-            channels: [],
-            classType: "telemetry",
+            itemHeight: 25,
+            padding: { top: 40, left: 10, right: 10, bottom: 10 },
+
+            /* 参数属性 */
+            parameter_base: 0,
+            opcode_base: 0,
+            parameters: [],
+            classType: "Parameters",
             className: ""
         };
     }
@@ -49,44 +31,45 @@ export class Telemetry extends UMLClass {
             outlineColor,
             textColor,
             headerColor,
-            classType = "telemetry",
+            classType = "Parameters",
             className = "",
-            telemetry_base = 0,
-            channels = []
+
+            parameter_base = 0,
+            opcode_base = 0,
+            parameters = []
         } = this.attributes;
 
-        // 修改 channelItems 的构建方式
-        const channelItems = channels.map((channel) => {
+        // 构建参数项
+        const parameterItems = parameters.map((parameter) => {
             const {
-                visibility = "+",
                 id = 0,
                 name = "",
                 data_type = 0,
                 size = 0,
-                update_type = 0,
-                abbrev = "",
-                format_string = "",
-                comment = ""
-            } = channel;
+                default: defaultValue = "",
+                comment = "",
+                set_opcode = 0,
+                save_opcode = 0
+            } = parameter;
 
             return {
-                id: `channel_${id}`,
+                id: `parameter_${id}`,
                 label: `${name}: ${fppTypeOptions[data_type].content}`,
-                icon: this.getVisibilityIcon(visibility, textColor),
+                icon: this.getVisibilityIcon('+', textColor),
                 name,
                 data_type,
                 size,
-                update_type,
-                abbrev,
-                format_string,
-                comment
+                default: defaultValue,
+                comment,
+                set_opcode,
+                save_opcode
             };
         });
 
-        if (channelItems.length === 0) {
-            channelItems.push({
-                id: 'channel_empty',
-                label: 'No channels',
+        if (parameterItems.length === 0) {
+            parameterItems.push({
+                id: 'parameter_empty',
+                label: 'No parameters',
                 icon: this.getVisibilityIcon('+', textColor)
             });
         }
@@ -136,7 +119,7 @@ export class Telemetry extends UMLClass {
                 }
             }, this.attr()),
             items: [[
-                ...channelItems,
+                ...parameterItems,
                 {
                     id: "delimiter",
                     height: thickness,
@@ -148,26 +131,23 @@ export class Telemetry extends UMLClass {
 
     getProperties() {
         const {
-            telemetry_base = 0,
-            channels = []
+            parameter_base = 0,
+            opcode_base = 0,
+            parameters = []
         } = this.attributes;
 
-        // 转换通道列表，添加可读的类型名称
-        const convertedChannels = channels.map(channel => ({
-            ...channel,
-            // 添加数据类型的可读名称
-            data_type_name: fppTypeOptions[channel.data_type]?.content || 'unknown',
-            // 添加更新类型的可读名称
-            update_type_name: updateTypeOptions[channel.update_type]?.content || 'unknown',
-            // 保留原始值
-            data_type: channel.data_type,
-            update_type: channel.update_type
+        // 转换参数列表，将 data_type 数字转换为具体类型名称
+        const convertedParameters = parameters.map(param => ({
+            ...param,
+            data_type_name: fppTypeOptions[param.data_type]?.content || 'unknown',
+            // 保留原始的 data_type 数值
+            data_type: param.data_type
         }));
 
         return {
-            telemetry_base,
-            channels: convertedChannels
+            parameter_base,
+            opcode_base,
+            parameters: convertedParameters
         };
     }
 }
-
