@@ -1,6 +1,7 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
 import { UMLClass } from './shapes';
 import { CommandKind, QueueFull } from '../models/command';
+import { fppTypeOptions } from './telemetry';
 
 // 创建命令类型选项
 export const commandKindOptions = Object.entries(CommandKind).map(([key, value]) => ({
@@ -46,30 +47,33 @@ export class Commands extends UMLClass {
             opcode_base
         } = this.attributes;
 
+
         // 将 commands 转换为显示项
-        const commandItems = commands.map((command) => {
+        const commandItems = commands.map((command,index) => {
             const {
                 mnemonic = "",
-                opcode = 0,
+                opcode,
                 kind = CommandKind.SYNC,  // 默认为同步命令
-                priority,
+                priority = 1,
                 full = QueueFull.ASSERT, // 默认为断言
                 args = []
             } = command;
 
             // 构建参数字符串
             const argsString = args.length > 0
-                ? `(${args.map(arg => `${arg.name}: ${arg.type}`).join(', ')})`
+                ? `(${args.map((arg, index) => {
+                    return `${arg.name}: ${fppTypeOptions[arg.type ?? '0'].content}`;
+                }).join(', ')})`
                 : '()';
 
             // 构建标签，包含优先级和队列满处理策略（如果适用）
             let label = `${mnemonic}${argsString}: ${kind}`;
             if (kind === CommandKind.ASYNC) {
-                label += ` [${priority || 'default'}, ${full}]`;
+                label += ` [${priority}, ${full}]`;
             }
 
             return {
-                id: `cmd_${opcode}`,
+                id: `cmd_${mnemonic}_${index}`,
                 label,
                 icon: this.getVisibilityIcon('+', textColor),
                 mnemonic,
@@ -166,7 +170,7 @@ export class Commands extends UMLClass {
             ...cmd,
             // 添加枚举值的可读名称
             kind_name: CommandKind[cmd.kind] || 'sync',
-            full_name: cmd.kind === CommandKind.ASYNC ? 
+            full_name: cmd.kind === CommandKind.ASYNC ?
                 (QueueFull[cmd.full] || 'assert') : undefined,
             // 保留原始值
             kind: cmd.kind,

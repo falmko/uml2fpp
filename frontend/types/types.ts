@@ -1,6 +1,8 @@
 // F´ 支持的原始数据类型
-export type FppPrimitiveType = "U8" | "I8" | "U16" | "I16" | "U32" | "I32" | "U64" | "I64" | "F32" | "F64" | "bool" | "string";
-
+export const FppPrimitiveTypes = [
+    "U8", "I8", "U16", "I16", "U32", "I32", "U64", "I64", "F32", "F64", "bool", "string"
+] as const;
+export type FppPrimitiveType = typeof FppPrimitiveTypes[number];
 // F´ 框架定义的枚举类型
 export interface FppEnum {
     name: string;

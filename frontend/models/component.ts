@@ -5,12 +5,13 @@ import { Event } from './event';
 import { Commands } from './command';
 
 export enum ComponentKind {
-    PASSIVE = "passive",   // 无线程无队列
-    QUEUED = "queued",     // 有队列无线程
-    ACTIVE = "active"      // 有线程有队列
+    ACTIVE = "ACTIVE",      // 有线程有队列
+    PASSIVE = "PASSIVE",   // 无线程无队列
+    QUEUED = "QUEUED",     // 有队列无线程
 }
 
 export class Component {
+    // 以下部分为组件的基本属性，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 组件名称 */
     name: string;
 

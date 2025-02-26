@@ -1,11 +1,11 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
 import { UMLClass } from './shapes';
+import {ComponentKind} from '../models/component';
 
-export const componentKindOptions = [
-    { value: 0, content: "passive" },   // 无线程无队列
-    { value: 1, content: "queued" },    // 有队列无线程 
-    { value: 2, content: "active" }     // 有线程有队列
-];
+export const componentKindOptions = Object.entries(ComponentKind).map(([key, value]) => ({
+    value: key,
+    content: value
+}));
 
 export class ComponentBase extends UMLClass {
     defaults() {
@@ -25,8 +25,8 @@ export class ComponentBase extends UMLClass {
             className: "",
             name: "",        // 组件名称
             namespace: "",   // C++ 命名空间 optional
-            kind: 2,        // 组件类型 active by default
-            modeler: false  // 建模器标志 默认自动创建端口
+            kind: componentKindOptions[0].content,       // 组件类型 active by default
+            modeler: true  // 建模器标志 默认自动创建端口
         };
     }
 
@@ -42,8 +42,8 @@ export class ComponentBase extends UMLClass {
             className = "",
             name = "",
             namespace = "",
-            kind = 2,
-            modeler = false
+            kind = componentKindOptions[0].content,
+            modeler = true
         } = this.attributes;
 
         // 构建组件属性项
@@ -51,7 +51,7 @@ export class ComponentBase extends UMLClass {
         propertyItems.push(
             {
                 id: 'kind',
-                label: `kind: ${componentKindOptions[kind].content}`,
+                label: `kind: ${kind}`,
                 icon: this.getVisibilityIcon('+', textColor)
             },
             {
@@ -119,14 +119,14 @@ export class ComponentBase extends UMLClass {
         const {
             name = "",
             namespace = "",
-            kind = 2,
-            modeler = false
+            kind = componentKindOptions[0].content,
+            modeler = true
         } = this.attributes;
 
         return {
             name,
             namespace,
-            kind: componentKindOptions[kind].content,
+            kind,
             modeler
         };
     }

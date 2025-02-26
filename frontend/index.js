@@ -2,15 +2,18 @@ import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/p
 
 import './joint-plus.css';
 import './styles.css';
-import { UMLClass, typeOptions } from './shapes/shapes'
+import { UMLClass } from './shapes/shapes'
 import { Telemetry } from './shapes/telemetry';
 import { Events } from './shapes/events';
-import { Severity } from './models/event';
 import { Composition } from './shapes/link';
 import { ComponentBase } from './shapes/compoent_base';
 import { Parameters } from './shapes/parameters';
 import { Commands } from './shapes/commands';
-import { CommandKind } from './models/command';
+import { createInspector, openTab } from './inspectors/inspectors';
+import { componentKindOptions } from './shapes/compoent_base';
+import { portKindOptions,passByOptions } from './shapes/port';
+import { queueFullOptions } from './shapes/commands';
+import { InputPort,OutputPort } from './shapes/port';
 
 // const namespace = { ...shapes, myNamespace: { UMLClass } };
 shapes.UMLClass = UMLClass;
@@ -18,7 +21,7 @@ shapes.UMLClassView = shapes.standard.HeaderedRecordView;
 shapes.Telemetry = Telemetry;
 shapes.TelemetryView = shapes.standard.HeaderedRecordView;
 shapes.Events = Events;
-shapes.LogView = shapes.standard.HeaderedRecordView;
+shapes.EventsView = shapes.standard.HeaderedRecordView;
 shapes.Composition = Composition;
 shapes.ComponentBase = ComponentBase;
 shapes.ComponentBaseView = shapes.standard.HeaderedRecordView;
@@ -26,8 +29,10 @@ shapes.Parameters = Parameters;
 shapes.ParametersView = shapes.standard.HeaderedRecordView;
 shapes.Commands = Commands;
 shapes.CommandsView = shapes.standard.HeaderedRecordView;
+shapes.InputPort = InputPort;
+shapes.OutputPort = OutputPort;
 
-const graph = new dia.Graph({}, { cellNamespace: shapes })
+const graph = new dia.Graph({}, { cellNamespace: shapes });
 
 const paperContainerEl = document.getElementById("paper");
 const stencilContainerEl = document.getElementById("stencil");
@@ -46,10 +51,30 @@ const paper = new dia.Paper({
     sorting: dia.Paper.sorting.APPROX,
     background: { color: "#F3F7F6" },
     defaultLink: (cellView, magnet) => {
-        return new shapes.Composition();
+        console.log("Default link:", cellView, magnet);
+        // 检查连接是否来自端口
+        if (magnet) {
+            // 确认是端口连接 - 检查magnet属性
+            const isPort = magnet.hasAttribute('port');
+            
+            if (isPort) {
+                // 端口连接使用普通连线
+                return new shapes.standard.Link();
+            }
+        }
+        
+        // 组件与事件/遥测等之间的连接使用组合线
+        return new shapes.Composition({
+            attrs: {
+                line: {
+                    stroke: '#5755a1',
+                    strokeWidth: 2
+                }
+            }
+        });
     },
-    defaultRouter: { 
-        name: 'normal',
+    defaultRouter: {
+        name: 'orthogonal',
         args: {
             padding: 40,
             excludeTypes: ['link'],
@@ -57,7 +82,7 @@ const paper = new dia.Paper({
             cost: 'manhattan'
         }
     },
-    defaultConnector: { name: 'straight', args: { cornerType: 'line' } },
+    defaultConnector: { name: 'rounded', args: { cornerType: 'line' } },
     defaultConnectionPoint: { name: "boundary" },
     clickThreshold: 10,
     magnetThreshold: "onleave",
@@ -73,23 +98,27 @@ const paper = new dia.Paper({
 
         // 如果源或目标是端口
         if (sourceMagnet || targetMagnet) {
-            // 只有当两端都是端口，且都是UMLClass的端口时才允许连接
+            // 只有当两端都是端口，且都是 ComponentBase 的端口时才允许连接
             return (sourceMagnet && targetMagnet &&
-                sourceModel instanceof shapes.UMLClass &&
-                targetModel instanceof shapes.UMLClass);
+                sourceModel instanceof shapes.ComponentBase &&
+                targetModel instanceof shapes.ComponentBase);
         }
 
-        // 如果源是UMLClass（且不是端口连接）
-        if (sourceModel instanceof shapes.UMLClass) {
+        // 如果源是 ComponentBase（且不是端口连接）
+        if (sourceModel instanceof shapes.ComponentBase) {
             // 目标必须是Log或Telemetry，且不能是端口连接
             return (targetModel instanceof shapes.Events ||
-                targetModel instanceof shapes.Telemetry) &&
+                targetModel instanceof shapes.Telemetry || 
+                targetModel instanceof shapes.Parameters || 
+                targetModel instanceof shapes.Commands) &&
                 !targetMagnet;  // 确保目标不是端口
         }
 
         // 如果源是Log或Telemetry，不允许作为连接的起点
         if (sourceModel instanceof shapes.Events ||
-            sourceModel instanceof shapes.Telemetry) {
+            sourceModel instanceof shapes.Telemetry || 
+            targetModel instanceof shapes.Parameters || 
+            targetModel instanceof shapes.Commands) {
             return false;
         }
 
@@ -100,15 +129,33 @@ const paper = new dia.Paper({
 // paperContainerEl.appendChild(paper.el);
 // 监听点击端口事件，添加端口工具
 paper.on("element:magnet:pointerclick", (elementView, evt, magnet) => {
+    evt.stopPropagation()
+    console.log("Magnet clicked:", elementView,evt,magnet);
     paper.removeTools();
     elementView.addTools(new dia.ToolsView({ tools: [new Ports()] }));
+    // 获取端口ID
+    const portId = magnet.getAttribute('port');
+    console.log("Port ID:", portId);
+    if (!portId) return;
+    
+    // 清除当前Inspector
+    if (currentInspectors) {
+        document.getElementById('inspector').style.display = 'none';
+        currentInspectors = null;
+    }
+    
+    // 显示端口Inspector
+    showPortInspector(elementView.model, portId);
 });
 // 监听点击空白处事件，移除所有工具
 paper.on("blank:pointerdown cell:pointerdown", () => {
     paper.removeTools();
+    // 清除当前Inspector
+    if (currentInspectors) {
+        document.getElementById('inspector').style.display = 'none';
+        currentInspectors = null;
+    }
 });
-
-
 
 
 // PaperScroller
@@ -186,9 +233,8 @@ const stencilElements = [
         name: "Component",
         className: "ComponentClass",
         classType: "Component",
-        namespace: "Example",
-        kind: 2,
-        modeler: false
+        kind: componentKindOptions[0].content,
+        modeler: true
     },
     // 添加 Parameters 配置
     {
@@ -202,20 +248,6 @@ const stencilElements = [
         outlineColor: "#00ACC1",
         textColor: "#006064",
         itemHeight: 25,
-        parameter_base: 0,
-        opcode_base: 0,
-        parameters: [
-            {
-                id: 0,
-                name: "example",
-                data_type: 0,
-                size: 1,
-                default: "0",
-                comment: "Example parameter",
-                set_opcode: 0,
-                save_opcode: 1
-            }
-        ]
     },
     // 添加 Events 配置
     {
@@ -229,15 +261,6 @@ const stencilElements = [
         outlineColor: "#7B1FA2",
         textColor: "#4A148C",
         itemHeight: 25,
-        events: [
-            {
-                id: 0,
-                name: "exampleEvent",
-                severity: "DIAGNOSTIC",
-                format_string: "Example event occurred",
-                args: []
-            }
-        ]
     },
     // 添加 Commands 配置
     {
@@ -251,15 +274,6 @@ const stencilElements = [
         outlineColor: "#43A047",
         textColor: "#1B5E20",
         itemHeight: 25,
-        opcode_base: 0,
-        commands: [
-            {
-                mnemonic: "EXAMPLE_CMD",
-                opcode: 0,
-                kind: "SYNC",
-                args: []
-            }
-        ]
     },
     // 添加 Telemetry 配置
     {
@@ -273,20 +287,6 @@ const stencilElements = [
         outlineColor: "#0288D1",
         textColor: "#01579B",
         itemHeight: 25,
-        telemetry_base: 0,
-        channels: [
-            {
-                visibility: "+",
-                id: 0,
-                name: "example",
-                data_type: 0,
-                size: 1,
-                update_type: 0,
-                abbrev: "ex",
-                format_string: "%d",
-                comment: "Example channel"
-            }
-        ]
     },
 ];
 
@@ -294,26 +294,125 @@ const stencilElements = [
 // The `port` property describes the port itself after it's dropped on the paper.
 const stencilPorts = [
     {
-        type: "standard.Rectangle",
+        // 同步输入端口
+        type: "InputPort",
         size: { width: 24, height: 24 },
         attrs: {
-            body: {
-                fill: "#ff9580"
-            }
+            body: { fill: "#ff9580" }
         },
         port: {
             markup: util.svg/*xml*/ `
                 <rect @selector="portBody"
-                    x="-12"
-                    y="-12"
-                    width="24"
-                    height="24"
-                    fill="#ff9580"
-                    stroke="#333333"
-                    stroke-width="2"
-                    magnet="active"
+                    x="-12" y="-12" width="24" height="24"
+                    fill="#ff9580" stroke="#333333" stroke-width="2" magnet="active"
                 />
-            `
+            `,
+            properties: {
+                name: "syncInput",
+                kind: portKindOptions[0].value,
+                namespace: "",
+                priority: null,
+                max_number: null,
+                full: queueFullOptions[0].value,
+                role: "",
+                comment: "Synchronous input port",
+                args: [],
+                return: null,
+                classType: "InputPort",
+                type: "InputPort"
+            }
+        }
+    },
+    {
+        // 保护输入端口
+        type: "InputPort",
+        size: { width: 24, height: 24 },
+        attrs: {
+            body: { fill: "#ffc880" }
+        },
+        port: {
+            markup: util.svg/*xml*/ `
+                <rect @selector="portBody"
+                    x="-12" y="-12" width="24" height="24"
+                    fill="#ffc880" stroke="#333333" stroke-width="2" magnet="active"
+                />
+            `,
+            properties: {
+                name: "guardedInput",
+                kind: portKindOptions[1].value,
+                namespace: "",
+                priority: null,
+                max_number: null,
+                full: queueFullOptions[0].value,
+                role: "",
+                comment: "Guarded input port",
+                args: [],
+                return: null,
+                classType: "InputPort",
+                type: "InputPort"
+            }
+        }
+    },
+    {
+        // 异步输入端口
+        type: "InputPort",
+        size: { width: 24, height: 24 },
+        attrs: {
+            body: { fill: "#ffff80" }
+        },
+        port: {
+            markup: util.svg/*xml*/ `
+                <rect @selector="portBody"
+                    x="-12" y="-12" width="24" height="24"
+                    fill="#ffff80" stroke="#333333" stroke-width="2" magnet="active"
+                />
+            `,
+            properties: {
+                name: "asyncInput",
+                kind: portKindOptions[2].value,
+                namespace: "",
+                priority: 1,
+                max_number: null,
+                full: queueFullOptions[0].value,
+                role: "",
+                comment: "Asynchronous input port",
+                args: [],
+                return: null,
+                classType: "InputPort",
+                type: "InputPort"
+            }
+        }
+    },
+    {
+        // 输出端口
+        type: "OutputPort",
+        size: { width: 24, height: 24 },
+        attrs: {
+            body: { 
+                fill: "#80ff95",
+            }
+        },
+        port: {
+            markup: util.svg/*xml*/ `
+                <polygon @selector="portBody"
+                    points="-12,-12 12,-12 0,12"
+                    fill="#80ff95" stroke="#333333" stroke-width="2" magnet="active"
+                />
+            `,
+            properties: {
+                name: "output",
+                kind: portKindOptions[3].value,
+                namespace: "",
+                priority: null,
+                max_number: null,
+                full: null,
+                role: "",
+                comment: "Output port",
+                args: [],
+                return: null,
+                classType: "OutputPort",
+                type: "OutputPort"
+            }
         }
     }
 ];
@@ -348,17 +447,46 @@ stencil.load({
 });
 
 let portIdCounter = 1;
-// TODO 自定义port和port显示内容，属性编辑
 function addElementPort(element, port, position) {
     const portId = `P-${portIdCounter++}`;
+    // 端口默认属性，基于Port模型
+    const defaultPortProps = {
+        name: portId,                // 端口名称
+        kind: "SYNC_INPUT",          // 端口类型（同步/异步输入、输出）
+        namespace: "",               // C++命名空间（可选）
+        priority: null,              // 异步端口的优先级（可选）
+        max_number: null,            // 此类型端口的最大数量（可选）
+        full: "ASSERT",              // 异步端口队列满时的行为（可选）
+        role: "",                    // 建模时的端口角色（可选）
+        comment: "",                 // 端口描述注释
+        args: [],                    // 端口参数列表
+        return: null,                // 返回值类型（可选）
+    };
+
+    // 从port.properties合并可能存在的属性
+    const properties = {...defaultPortProps, ...port.properties};
+    // 根据端口类型设置不同的颜色
+    const portColors = {
+        'SYNC_INPUT': '#ff9580',     // 同步输入端口为红色
+        'GUARDED_INPUT': '#ffc880',  // 保护输入端口为橙色
+        'ASYNC_INPUT': '#ffff80',    // 异步输入端口为黄色
+        'OUTPUT': '#80ff95'          // 输出端口为绿色
+    };
+
+    const portColor = portColors[properties.kind] || portColors.SYNC_INPUT;
+
     element.addPort({
         id: portId,
         group: "absolute",
         args: position,
+        properties: properties,    // 添加自定义属性
         ...util.merge(port, {
             attrs: {
+                portBody: {
+                    fill: portColor
+                },
                 portLabel: {
-                    text: portId
+                    text: properties.name
                 }
             }
         })
@@ -411,11 +539,16 @@ stencil.on({
         const { dropTarget } = evt.data;
         if (dropTarget) {
             stencil.cancelDrag();
-            addElementPort(
+            const portId = addElementPort(
                 dropTarget,
                 clone.get("port"),
                 cloneArea.topLeft().difference(dropTarget.position()).toJSON()
             );
+            
+            // 稍微延迟显示端口Inspector，确保DOM已更新
+            setTimeout(() => {
+                showPortInspector(dropTarget, portId);
+            }, 100);
         } else {
             // An invalid drop target. Animate the port back to the stencil.
             stencil.cancelDrag({ dropAnimation: true });
@@ -749,8 +882,148 @@ paper.on('blank:pointerdown', async () => {
 
 // Inspector
 // --------- 
-// TODO add inspector
+// 当前inspector实例
+let currentInspectors = null;
+// 点击元素时创建inspector
+paper.on('element:pointerclick', (elementView, evt) => {
+    if (currentInspectors) {
+        document.getElementById('inspector').style.display = 'none';
+    }
+    currentInspectors = createInspector(elementView.model);
+});
+// 点击空白处隐藏inspector
+paper.on('blank:pointerclick', () => {
+    document.getElementById('inspector').style.display = 'none';
+    currentInspectors = null;
+});
+// Tab切换事件监听
+document.getElementById('inspector').addEventListener('click', (evt) => {
+    if (evt.target.classList.contains('inspector-tab-button')) {
+        openTab(evt.target.dataset.inspector);
+    }
+});
+// 修改 showPortInspector 函数，确保属性正确同步
+function showPortInspector(element, portId) {
+    if (!element || !portId) return;
+    console.log("element for inspector:", element);
+    
+    const port = element.getPort(portId);
+    console.log("Port for inspector:", port);
+    if (!port) return;
+    
+    // 确保port.properties存在
+    port.properties = port.properties || {
+        name: portId,
+        kind: "SYNC_INPUT",
+        namespace: "",
+        priority: null,
+        max_number: null,
+        full: "ASSERT",
+        role: "",
+        comment: "",
+        args: [],
+        return: null
+    };
+    let tempModel = null;
+    if (port.properties.classType === 'InputPort') {
+        // 创建临时模型以供Inspector使用
+        tempModel = new dia.Cell({
+            id: `port-${portId}`,
+            type: 'InputPort',
+            classType: 'InputPort',  // 添加classType以匹配inspectorConfigs的键
+            // 展开端口属性，确保每个属性都是顶级属性
+            ...JSON.parse(JSON.stringify(port.properties))
+        });
+    }else{
+        // 创建临时模型以供Inspector使用
+        tempModel = new dia.Cell({
+            id: `port-${portId}`,
+            type: 'OutputPort',
+            classType: 'OutputPort',  // 添加classType以匹配inspectorConfigs的键
+            // 展开端口属性，确保每个属性都是顶级属性
+            ...JSON.parse(JSON.stringify(port.properties))
+        });
+    }
+    
+    console.log("Port model for inspector:", tempModel.attributes);
+    
+    // 获取Inspector容器
+    const inspectorContainer = document.getElementById('inspector');
+    // 清空容器
+    inspectorContainer.innerHTML = '';
+    
+    // 添加标题
+    const titleElem = document.createElement('div');
+    titleElem.className = 'inspector-title';
+    titleElem.textContent = `编辑端口: ${port.properties.name}`;
+    inspectorContainer.appendChild(titleElem);
+    
+    // 创建Inspector
+    currentInspectors = createInspector(tempModel);
+    
+    // 使用正确的事件监听方式绑定所有可能的属性变化
+    if (currentInspectors) {
+        const generalInspector = currentInspectors.general;
+        if(generalInspector){
+            const propertyKeys = ['name', 'kind', 'namespace', 'priority', 'max_number', 'full', 'role', 'comment']
+            propertyKeys.forEach(key => {
+                generalInspector.on(`change:${key}`, function(value, inputEl) {
+                    console.log(`Port property ${key} changed to:`, value);
+                    // 更新端口属性
+                    element.portProp(portId, `properties/${key}`, value);
+                    if (key === 'name') {
+                        // 如果是名称，同时更新显示的标签
+                        element.portProp(portId, 'attrs/portLabel/text', value);
+                    }else if (key === 'kind') {
+                        // 如果是端口类型，更新端口颜色和形状
+                        const portColors = {
+                            'SYNC_INPUT': '#ff9580',
+                            'GUARDED_INPUT': '#ffc880',
+                            'ASYNC_INPUT': '#ffff80',
+                            'OUTPUT': '#80ff95'
+                        };
+                        element.portProp(portId, 'attrs/portBody/fill', portColors[value] || '#ff9580');
+                    }
+                });
+            });
+        }
+        
+        // 监听整个args数组的变化
+        const argsInspector = currentInspectors.args;
+        if (argsInspector) {
+            const propertyKeys = [];
+            for(let i = 0; i < 5; i++){
+                propertyKeys.push(`args/${i}/type`);
+                propertyKeys.push(`args/${i}/pass_by`);
+                propertyKeys.push(`args/${i}/name`);
+                propertyKeys.push(`args/${i}/size`);
+            }
+            propertyKeys.forEach(key => {
+                argsInspector.on(`change:${key}`, function(value, inputEl) {
+                    console.log(`Port property ${key} changed to:`, value);
+                    // 更新端口属性
+                    element.portProp(portId, `properties/${key}`, value);
+                });
+            });
+        }
 
+        // 监听返回值的变化
+        const returnInspector = currentInspectors.return;
+        if (returnInspector) {
+            const propertyKeys = ['return/type', 'return/pass_by'];
+            propertyKeys.forEach(key => {
+                returnInspector.on(`change:${key}`, function(value, inputEl) {
+                    console.log(`Port property ${key} changed to:`, value);
+                    // 更新端口属性
+                    element.portProp(portId, `properties/${key}`, value);
+                });
+            });
+        }
+    }
+    
+    // 显示Inspector
+    inspectorContainer.style.display = 'block';
+}
 
 // Keyboard
 // --------
@@ -777,269 +1050,3 @@ keyboard.on('delete', () => {
     // 清空选择集合
     selection.collection.reset();
 });
-
-const visibilityOptions = [
-    {
-        value: "+",
-        content: "Public"
-    },
-    {
-        value: "-",
-        content: "Private"
-    },
-    {
-        value: "#",
-        content: "Protected"
-    },
-    {
-        value: "/",
-        content: "Derived"
-    },
-    {
-        value: "~",
-        content: "Package"
-    }
-];
-const umlClass1 = new UMLClass({
-    position: { x: 100, y: 100 }, // 添加位置信息
-    size: { width: 200 }, // 添加宽度信息
-    className: "Shape",
-    classType: "interface",
-    outlineColor: "#ff9580",
-    color: "#ffeae5",
-    headerColor: "#ffd4cc",
-    textColor: "#002b33",
-    itemHeight: 25,
-    attributes: [
-        {
-            visibility: "-",
-            name: "x",
-            returnType: 2
-        },
-        {
-            visibility: "-",
-            name: "y",
-            returnType: 3
-        }
-    ],
-    operations: [
-        {
-            visibility: "+",
-            name: "getPosition",
-            parameters: [],
-            returnType: 5
-        },
-        {
-            visibility: "+",
-            name: "setPosition",
-            parameters: [
-                { name: "x", type: 2 },
-                { name: "y", type: 2 }
-            ],
-            returnType: 4
-        },
-        {
-            visibility: "+",
-            name: "isShape",
-            parameters: [{ name: "shape", type: 7 }],
-            returnType: 0,
-            isStatic: true
-        }
-    ],
-    // 添加端口组配置
-    ports: {
-        groups: {
-            absolute: {
-                position: "absolute",
-                label: {
-                    position: { name: "inside", args: { offset: 22 } },
-                    markup: util.svg`
-                        <text @selector="portLabel"
-                            y="0.3em"
-                            fill="#333"
-                            text-anchor="middle"
-                            font-size="15"
-                            font-family="sans-serif"
-                        />
-                    `
-                }
-            }
-        },
-        items: [] // 初始化空的端口列表
-    }
-});
-
-graph.addCells([umlClass1]);
-const r1p11 = addElementPort(umlClass1, stencilPorts[0].port, { x: "100%", y: 20 });
-
-const inspectorGeneral = new ui.Inspector({
-    cell: umlClass1,
-    inputs: {
-        className: {
-            type: "text",
-            group: "name",
-            label: "Class name"
-        },
-        classType: {
-            type: "text",
-            group: "name",
-            label: "Class type"
-        },
-        color: {
-            type: "color",
-            group: "presentation",
-            label: "Color"
-        },
-        headerColor: {
-            type: "color",
-            group: "presentation",
-            label: "Header Color"
-        },
-        outlineColor: {
-            type: "color",
-            group: "presentation",
-            label: "Outline color"
-        },
-        textColor: {
-            type: "color",
-            group: "presentation",
-            label: "Text color"
-        }
-    },
-    groups: {
-        name: {
-            index: 1
-        },
-        presentation: {
-            index: 2
-        }
-    }
-});
-
-inspectorGeneral.render();
-document.getElementById("inspector-general").appendChild(inspectorGeneral.el);
-
-const inspectorAttributes = new ui.Inspector({
-    cell: umlClass1,
-    inputs: {
-        attributes: {
-            type: "list",
-            addButtonLabel: "Add Attribute",
-            item: {
-                type: "object",
-                properties: {
-                    name: {
-                        type: "text",
-                        label: "Attribute",
-                        index: 1
-                    },
-                    visibility: {
-                        type: "select",
-                        options: visibilityOptions,
-                        label: "Visibility",
-                        index: 2
-                    },
-                    returnType: {
-                        type: "select",
-                        options: typeOptions,
-                        label: "Return type",
-                        index: 3
-                    },
-                    isStatic: {
-                        type: "toggle",
-                        index: 4,
-                        label: "Static Attribute"
-                    }
-                }
-            }
-        }
-    }
-});
-
-inspectorAttributes.render();
-document
-    .getElementById("inspector-attributes")
-    .appendChild(inspectorAttributes.el);
-
-const inspectorOperations = new ui.Inspector({
-    cell: umlClass1,
-    inputs: {
-        operations: {
-            type: "list",
-            addButtonLabel: "Add Operation",
-            item: {
-                type: "object",
-                properties: {
-                    name: {
-                        type: "text",
-                        label: "Operation",
-                        index: 1
-                    },
-                    visibility: {
-                        type: "select",
-                        options: visibilityOptions,
-                        label: "Visibility",
-                        index: 2
-                    },
-                    returnType: {
-                        type: "select",
-                        options: typeOptions,
-                        label: "Return type",
-                        index: 3
-                    },
-                    isStatic: {
-                        type: "toggle",
-                        index: 4,
-                        label: "Static Operation"
-                    },
-                    parameters: {
-                        type: "list",
-                        item: {
-                            type: "object",
-                            properties: {
-                                name: {
-                                    type: "text",
-                                    index: 1,
-                                    label: "Parameter name"
-                                },
-                                type: {
-                                    type: "select",
-                                    options: typeOptions,
-                                    index: 2,
-                                    label: "Parameter type"
-                                }
-                            }
-                        },
-                        label: "Parameters",
-                        index: 5
-                    }
-                }
-            }
-        }
-    }
-});
-
-inspectorOperations.render();
-document
-    .getElementById("inspector-operations")
-    .appendChild(inspectorOperations.el);
-
-function openTab(tabName) {
-    const t = document.getElementsByClassName("inspector-tab");
-    for (let i = 0; i < t.length; i++) {
-        t[i].style.display = t[i].id === tabName ? "block" : "none";
-    }
-    const b = document.getElementsByClassName("inspector-tab-button");
-    for (let i = 0; i < b.length; i++) {
-        b[i].classList.toggle("active", b[i].dataset.inspector === tabName);
-    }
-}
-
-document.getElementById("inspector").addEventListener("click", (evt) => {
-    if (!evt.target.classList.contains("inspector-tab-button")) return;
-    openTab(evt.target.dataset.inspector);
-});
-
-openTab("inspector-general");
-
-paper.translate(paper.getArea().width / 2 - umlClass1.size().width / 2, 20);

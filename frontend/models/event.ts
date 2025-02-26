@@ -13,6 +13,7 @@ export enum Severity {
 // 事件是对系统活动的日志记录，类似于程序执行日志，有助于跟踪系统的运行状况。
 // 事件通常用于捕获组件的操作，并且都应被捕获以供地面站分析。
 export class Event {
+    // 以下部分为Event的基本属性，需要集成在Component中，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 事件ID */
     id: number;
 

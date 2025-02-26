@@ -40,9 +40,8 @@ export class Parameters extends UMLClass {
         } = this.attributes;
 
         // 构建参数项
-        const parameterItems = parameters.map((parameter) => {
+        const parameterItems = parameters.map((parameter,index) => {
             const {
-                id = 0,
                 name = "",
                 data_type = 0,
                 size = 0,
@@ -53,7 +52,7 @@ export class Parameters extends UMLClass {
             } = parameter;
 
             return {
-                id: `parameter_${id}`,
+                id: `parameter_${index}`,
                 label: `${name}: ${fppTypeOptions[data_type].content}`,
                 icon: this.getVisibilityIcon('+', textColor),
                 name,

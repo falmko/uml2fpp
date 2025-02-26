@@ -1,15 +1,15 @@
 import { Arg } from '../types/arg';
 
 export enum CommandKind {
-    SYNC = "sync",         // 直接调用派生类方法
-    GUARDED = "guarded",   // 使用互斥锁保护的调用
-    ASYNC = "async"        // 异步消息调用
+    SYNC = "SYNC",         // 直接调用派生类方法
+    GUARDED = "GUARDED",   // 使用互斥锁保护的调用
+    ASYNC = "ASYNC"        // 异步消息调用
 }
 
 export enum QueueFull {
-    DROP = "drop",       // 丢弃消息
-    BLOCK = "block",     // 阻塞等待
-    ASSERT = "assert"    // 触发断言（默认）
+    ASSERT = "ASSERT",    // 触发断言（默认）
+    DROP = "DROP",       // 丢弃消息
+    BLOCK = "BLOCK",     // 阻塞等待
 }
 
 // 每个组件定义了一组用于操作的命令。这些命令专为用户与组件交互设计，不同于用于组件间通信的端口。
@@ -38,6 +38,7 @@ export interface Command {
 }
 
 export class Commands {
+    // 以下部分为命令的基本属性，需要集成在Component中，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 操作码基础值（可选） */
     opcode_base?: number;
 

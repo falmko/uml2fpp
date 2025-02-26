@@ -34,6 +34,7 @@ export interface Channel {
 }
 
 export class Telemetry {
+    // 以下部分为遥测端口的基本属性，需要集成在Component中，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 通道ID基础值（可选） */
     telemetry_base?: number;
     

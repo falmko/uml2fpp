@@ -1,25 +1,18 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
 import { UMLClass } from './shapes';
+import {FppPrimitiveTypes} from '../types/types';
+import { UpdateType } from '../models/telemetry';
 
-export const updateTypeOptions = [
-    { value: 0, content: "always" },
-    { value: 1, content: "on_change" }
-];
+export const updateTypeOptions = Object.entries(UpdateType).map(([key, value], index) => ({
+    value: index, 
+    content: value
+}));
 
-export const fppTypeOptions = [
-    { value: 0, content: "U8" },
-    { value: 1, content: "I8" },
-    { value: 2, content: "U16" },
-    { value: 3, content: "I16" },
-    { value: 4, content: "U32" },
-    { value: 5, content: "I32" },
-    { value: 6, content: "U64" },
-    { value: 7, content: "I64" },
-    { value: 8, content: "F32" },
-    { value: 9, content: "F64" },
-    { value: 10, content: "bool" },
-    { value: 11, content: "string" }
-];
+// 动态从 FppPrimitiveTypes 生成选项
+export const fppTypeOptions = FppPrimitiveTypes.map((type, index) => ({
+    value: index,
+    content: type
+}));
 
 export class Telemetry extends UMLClass {
     defaults() {
@@ -56,10 +49,9 @@ export class Telemetry extends UMLClass {
         } = this.attributes;
 
         // 修改 channelItems 的构建方式
-        const channelItems = channels.map((channel) => {
+        const channelItems = channels.map((channel,index) => {
             const {
                 visibility = "+",
-                id = 0,
                 name = "",
                 data_type = 0,
                 size = 0,
@@ -70,7 +62,7 @@ export class Telemetry extends UMLClass {
             } = channel;
 
             return {
-                id: `channel_${id}`,
+                id: `channel_${index}`,
                 label: `${name}: ${fppTypeOptions[data_type].content}`,
                 icon: this.getVisibilityIcon(visibility, textColor),
                 name,

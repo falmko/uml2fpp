@@ -29,6 +29,7 @@ export interface Parameter {
 }
 
 export class Parameters {
+    // 以下部分为参数的基本属性，需要集成在Component中，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 参数ID基础值（可选） */
     parameter_base?: number;
 

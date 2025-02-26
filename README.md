@@ -38,3 +38,10 @@ npm run dev
 - https://www.jointjs.com/demos/uml-class-diagrams
 - https://www.jointjs.com/demos/uml-class-shape-inspector
 - https://www.jointjs.com/blog/15-community-designed-demo-apps
+
+## 下一步工作 - 模型检验
+
+- 导出的符合F Prime规范的XML文件转换为Promela模型 - Python编写XML到Promela的解析器
+- 使用Spin模型检验工具对Promela模型进行验证 - Spin模型检验工具
+- 生成验证报告 - Python编写Spin验证报告解析器
+- https://github.com/copilot/c/658dcd0c-7b3e-409f-956b-36f61f65abac

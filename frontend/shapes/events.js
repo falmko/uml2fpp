@@ -38,9 +38,8 @@ export class Events extends UMLClass {
         } = this.attributes;
 
         // 将 events 转换为显示项
-        const eventItems = events.map((event) => {
+        const eventItems = events.map((event,index) => {
             const {
-                id = 0,
                 name = "",
                 severity = Severity.DIAGNOSTIC,
                 format_string = "",
@@ -53,7 +52,7 @@ export class Events extends UMLClass {
                 : '()';
 
             return {
-                id: `event_${id}`,
+                id: `event_${index}`,
                 label: `${name}${argsString}: ${severity}`,
                 icon: this.getVisibilityIcon('+', textColor),
                 name,

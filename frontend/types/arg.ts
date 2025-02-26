@@ -1,9 +1,9 @@
 import { FppType } from './types';
 
 export enum PassBy {
-    DEFAULT = "default",
-    POINTER = "pointer",
-    REFERENCE = "reference"
+    DEFAULT = "DEFAULT",
+    POINTER = "POINTER",
+    REFERENCE = "REFERENCE"
 }
 
 export class Arg {

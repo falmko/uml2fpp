@@ -1,4 +1,27 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
+
+export const visibilityOptions = [
+    {
+        value: "+",
+        content: "Public"
+    },
+    {
+        value: "-",
+        content: "Private"
+    },
+    {
+        value: "#",
+        content: "Protected"
+    },
+    {
+        value: "/",
+        content: "Derived"
+    },
+    {
+        value: "~",
+        content: "Package"
+    }
+];
 export const typeOptions = [
     {
         value: 0,
