@@ -62,7 +62,7 @@ export class Commands extends UMLClass {
             // 构建参数字符串
             const argsString = args.length > 0
                 ? `(${args.map((arg, index) => {
-                    return `${arg.name}: ${fppTypeOptions[arg.type ?? '0'].content}`;
+                    return `${arg.name}: ${arg.type}`;
                 }).join(', ')})`
                 : '()';
 

@@ -4,9 +4,9 @@ import { fppTypeOptions } from './telemetry';
 import { PortKind } from "../models/port";
 
 // 定义PassBy选项
-export const passByOptions = Object.values(PassBy).map((value, index) => ({
-    value: index,
-    content: value
+export const passByOptions = Object.entries(PassBy).map(([key, value]) => ({
+    value: value,
+    content: key
 }));
 
 // 将端口类型转换为选项

@@ -1,6 +1,7 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
 import { UMLClass } from './shapes';
 import { Severity } from '../models/event';
+import { fppTypeOptions } from './telemetry';
 
 export const severityOptions = Object.entries(Severity).map(([key, value]) => ({
     value: key,
@@ -48,7 +49,7 @@ export class Events extends UMLClass {
 
             // 构建参数字符串
             const argsString = args.length > 0 
-                ? `(${args.map(arg => `${arg.name}: ${arg.type}`).join(', ')})`
+                ? `(${args.map(arg => `${arg.name}: ${fppTypeOptions[arg.type ?? '0'].content}`).join(', ')})`
                 : '()';
 
             return {

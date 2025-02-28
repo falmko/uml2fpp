@@ -39,6 +39,9 @@ npm run dev
 - https://www.jointjs.com/demos/uml-class-shape-inspector
 - https://www.jointjs.com/blog/15-community-designed-demo-apps
 
+## 问题及解决
+- 社区提问及解决 https://github.com/clientIO/joint/discussions/2891
+
 ## 下一步工作 - 模型检验
 
 - 导出的符合F Prime规范的XML文件转换为Promela模型 - Python编写XML到Promela的解析器

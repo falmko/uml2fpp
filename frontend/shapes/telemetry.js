@@ -3,14 +3,13 @@ import { UMLClass } from './shapes';
 import {FppPrimitiveTypes} from '../types/types';
 import { UpdateType } from '../models/telemetry';
 
-export const updateTypeOptions = Object.entries(UpdateType).map(([key, value], index) => ({
-    value: index, 
+export const updateTypeOptions = Object.entries(UpdateType).map(([key, value]) => ({
+    value: key, 
     content: value
 }));
-
 // 动态从 FppPrimitiveTypes 生成选项
 export const fppTypeOptions = FppPrimitiveTypes.map((type, index) => ({
-    value: index,
+    value: type,  // 使用索引作为值，或者使用type本身
     content: type
 }));
 
