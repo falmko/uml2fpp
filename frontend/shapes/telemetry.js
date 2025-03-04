@@ -27,9 +27,9 @@ export class Telemetry extends UMLClass {
             padding: { top: 40, left: 10, right: 10, bottom: 10 }, // 添加这行
             
             /* 遥测属性 */
-            telemetry_base: 0,
+            telemetry_base: undefined,
             channels: [],
-            classType: "telemetry",
+            classType: "Telemetry",
             className: ""
         };
     }
@@ -41,9 +41,9 @@ export class Telemetry extends UMLClass {
             outlineColor,
             textColor,
             headerColor,
-            classType = "telemetry",
+            classType = "Telemetry",
             className = "",
-            telemetry_base = 0,
+            telemetry_base = "",
             channels = []
         } = this.attributes;
 
@@ -52,24 +52,26 @@ export class Telemetry extends UMLClass {
             const {
                 visibility = "+",
                 name = "",
+                channel_id = "",
                 data_type = 0,
-                size = 0,
+                size = 20,
                 update_type = 0,
                 abbrev = "",
-                format_string = "",
+                // format_string = "",
                 comment = ""
             } = channel;
 
             return {
                 id: `channel_${index}`,
-                label: `${name}: ${fppTypeOptions[data_type].content}`,
+                label: `${name}: ${data_type}`,
                 icon: this.getVisibilityIcon(visibility, textColor),
                 name,
+                channel_id,
                 data_type,
                 size,
                 update_type,
                 abbrev,
-                format_string,
+                // format_string,
                 comment
             };
         });

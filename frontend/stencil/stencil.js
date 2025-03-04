@@ -107,66 +107,6 @@ const stencilPorts = [
         }
     },
     {
-        // 保护输入端口
-        type: "InputPort",
-        size: { width: 24, height: 24 },
-        attrs: {
-            body: { fill: "#ffc880" }
-        },
-        port: {
-            markup: util.svg/*xml*/ `
-                <rect @selector="portBody"
-                    x="-12" y="-12" width="24" height="24"
-                    fill="#ffc880" stroke="#333333" stroke-width="2" magnet="active"
-                />
-            `,
-            properties: {
-                name: "guardedInput",
-                kind: portKindOptions[1].value,
-                namespace: "",
-                priority: null,
-                max_number: null,
-                full: queueFullOptions[0].value,
-                role: "",
-                comment: "Guarded input port",
-                args: [],
-                return: null,
-                classType: "InputPort",
-                type: "InputPort"
-            }
-        }
-    },
-    {
-        // 异步输入端口
-        type: "InputPort",
-        size: { width: 24, height: 24 },
-        attrs: {
-            body: { fill: "#ffff80" }
-        },
-        port: {
-            markup: util.svg/*xml*/ `
-                <rect @selector="portBody"
-                    x="-12" y="-12" width="24" height="24"
-                    fill="#ffff80" stroke="#333333" stroke-width="2" magnet="active"
-                />
-            `,
-            properties: {
-                name: "asyncInput",
-                kind: portKindOptions[2].value,
-                namespace: "",
-                priority: 1,
-                max_number: null,
-                full: queueFullOptions[0].value,
-                role: "",
-                comment: "Asynchronous input port",
-                args: [],
-                return: null,
-                classType: "InputPort",
-                type: "InputPort"
-            }
-        }
-    },
-    {
         // 输出端口
         type: "OutputPort",
         size: { width: 24, height: 24 },

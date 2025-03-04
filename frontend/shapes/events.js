@@ -42,6 +42,7 @@ export class Events extends UMLClass {
         const eventItems = events.map((event,index) => {
             const {
                 name = "",
+                event_id = "",
                 severity = Severity.DIAGNOSTIC,
                 format_string = "",
                 args = []
@@ -49,7 +50,7 @@ export class Events extends UMLClass {
 
             // 构建参数字符串
             const argsString = args.length > 0 
-                ? `(${args.map(arg => `${arg.name}: ${fppTypeOptions[arg.type ?? '0'].content}`).join(', ')})`
+                ? `(${args.map(arg => `${arg.name}: ${arg.type}`).join(', ')})`
                 : '()';
 
             return {
@@ -57,6 +58,7 @@ export class Events extends UMLClass {
                 label: `${name}${argsString}: ${severity}`,
                 icon: this.getVisibilityIcon('+', textColor),
                 name,
+                event_id,
                 severity,
                 format_string,
                 args

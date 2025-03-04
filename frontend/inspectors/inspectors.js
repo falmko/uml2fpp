@@ -69,7 +69,12 @@ export const inspectorConfigs = {
                     type: "toggle",
                     group: "basic",
                     label: "Modeler",
-                    defaultValue: true
+                    defaultValue: false
+                },
+                comment: {
+                    type: "textarea",
+                    group: "basic",
+                    label: "Comment"
                 }
             }
         }
@@ -84,7 +89,7 @@ export const inspectorConfigs = {
                     label: "Class Name"
                 },
                 opcode_base: {
-                    type: "number",
+                    type: "text",
                     group: "basic",
                     label: "Base OpCode(optional)"
                 }
@@ -110,7 +115,7 @@ export const inspectorConfigs = {
                                 defaultValue: commandKindOptions[0].value
                             },
                             opcode: {
-                                type: "number",
+                                type: "text",
                                 label: "OpCode",
                                 index: 3,
                                 defaultValue: 0
@@ -151,7 +156,7 @@ export const inspectorConfigs = {
                                         size: {
                                             type: "number",
                                             label: "Size(string only)",
-                                            when: { eq: { 'commands/${index}/args/${index}/type': '11' }}, // string
+                                            when: { eq: { 'commands/${index}/args/${index}/type': 'string' }}, // string
                                             defaultValue: 20
                                         }
                                     }
@@ -178,10 +183,9 @@ export const inspectorConfigs = {
                     label: "Class Name"
                 },
                 telemetry_base: {
-                    type: "number",
+                    type: "text",
                     group: "basic",
                     label: "Telemetry Base ID(optional)",
-                    defaultValue: 0
                 }
             },
             channels: {
@@ -197,11 +201,10 @@ export const inspectorConfigs = {
                                 index: 1,
                                 defaultValue: "channel"
                             },
-                            id: {
-                                type: "number",
+                            channel_id: {
+                                type: "text",
                                 label: "Channel ID",
                                 index: 2,
-                                defaultValue: 0
                             },
                             data_type: {
                                 type: "select",
@@ -214,7 +217,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size(string only)",
                                 index: 4,
-                                when: { eq: { 'channels/${index}/data_type': 11 }}, // string类型
+                                when: { eq: { 'channels/${index}/data_type': "string" }}, // string类型
                                 defaultValue: 20
                             },
                             update_type: {
@@ -230,15 +233,10 @@ export const inspectorConfigs = {
                                 index: 6,
                                 defaultValue: "ch"
                             },
-                            format_string: {
-                                type: "text",
-                                label: "Format String(optional)",
-                                index: 7,
-                            },
                             comment: {
                                 type: "textarea",
                                 label: "Comment(optional)",
-                                index: 8
+                                index: 7
                             }
                         }
                     }
@@ -256,12 +254,12 @@ export const inspectorConfigs = {
                     label: "Class Name"
                 },
                 parameter_base: {
-                    type: "number",
+                    type: "text",
                     group: "basic",
                     label: "Parameter Base ID(optional)",
                 },
                 opcode_base: {
-                    type: "number",
+                    type: "text",
                     group: "basic",
                     label: "OpCode Base ID(optional)",
                 }
@@ -279,11 +277,10 @@ export const inspectorConfigs = {
                                 index: 1,
                                 defaultValue: "param"
                             },
-                            id: {
-                                type: "number",
+                            parameter_id: {
+                                type: "text",
                                 label: "Parameter ID",
                                 index: 2,
-                                defaultValue: 0
                             },
                             data_type: {
                                 type: "select",
@@ -296,7 +293,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size(string only)",
                                 index: 4,
-                                when: { eq: { 'parameters/${index}/data_type': 11 }}, // string类型
+                                when: { eq: { 'parameters/${index}/data_type': 'string' }}, // string类型
                                 defaultValue: 20
                             },
                             default: {
@@ -306,16 +303,14 @@ export const inspectorConfigs = {
                                 defaultValue: ""
                             },
                             set_opcode: {
-                                type: "number",
+                                type: "text",
                                 label: "Set OpCode",
                                 index: 6,
-                                defaultValue: 0
                             },
                             save_opcode: {
-                                type: "number",
+                                type: "text",
                                 label: "Save OpCode",
                                 index: 7,
-                                defaultValue: 0
                             },
                             comment: {
                                 type: "textarea",
@@ -351,8 +346,8 @@ export const inspectorConfigs = {
                                 index: 1,
                                 defaultValue: "event"
                             },
-                            id: {
-                                type: "number",
+                            event_id: {
+                                type: "text",
                                 label: "Event ID",
                                 index: 2,
                                 defaultValue: 0
@@ -391,7 +386,7 @@ export const inspectorConfigs = {
                                         size: {
                                             type: "number",
                                             label: "Size(string only)",
-                                            when: { eq: { 'events/${index}/args/${index}/type': '11' }}, // string
+                                            when: { eq: { 'events/${index}/args/${index}/type': 'string' }}, // string
                                             defaultValue: 20
                                         }
                                     }
@@ -481,7 +476,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size (string only)",
                                 index: 3,
-                                when: { eq: { 'args/${index}/type': 11 }}, // string类型索引
+                                when: { eq: { 'args/${index}/type': 'string' }}, // string类型索引
                                 defaultValue: 20
                             },
                             pass_by: {
@@ -576,7 +571,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size (string only)",
                                 index: 3,
-                                when: { eq: { 'args/${index}/type': 11 }}, // string类型索引
+                                when: { eq: { 'args/${index}/type': 'string' }}, // string类型索引
                                 defaultValue: 20
                             },
                             pass_by: {

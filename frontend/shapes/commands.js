@@ -98,7 +98,7 @@ export class Commands extends UMLClass {
 
         let items = [];
         // 如果有opcode_base，显示
-        if (opcode_base !== undefined) {
+        if (opcode_base !== undefined&&opcode_base!== "") {
             items.push({
                 id: 'opcode_base',
                 label: `Base OpCode: ${opcode_base}`,

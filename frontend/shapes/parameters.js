@@ -16,8 +16,8 @@ export class Parameters extends UMLClass {
             padding: { top: 40, left: 10, right: 10, bottom: 10 },
 
             /* 参数属性 */
-            parameter_base: 0,
-            opcode_base: 0,
+            parameter_base: undefined,
+            opcode_base: undefined,
             parameters: [],
             classType: "Parameters",
             className: ""
@@ -34,8 +34,8 @@ export class Parameters extends UMLClass {
             classType = "Parameters",
             className = "",
 
-            parameter_base = 0,
-            opcode_base = 0,
+            parameter_base,
+            opcode_base,
             parameters = []
         } = this.attributes;
 
@@ -43,19 +43,21 @@ export class Parameters extends UMLClass {
         const parameterItems = parameters.map((parameter,index) => {
             const {
                 name = "",
+                parameter_id = "",
                 data_type = 0,
                 size = 0,
                 default: defaultValue = "",
                 comment = "",
-                set_opcode = 0,
-                save_opcode = 0
+                set_opcode = "",
+                save_opcode = ""
             } = parameter;
 
             return {
                 id: `parameter_${index}`,
-                label: `${name}: ${fppTypeOptions[data_type].content}`,
+                label: `${name}: ${data_type}`,
                 icon: this.getVisibilityIcon('+', textColor),
                 name,
+                parameter_id,
                 data_type,
                 size,
                 default: defaultValue,
@@ -130,8 +132,8 @@ export class Parameters extends UMLClass {
 
     getProperties() {
         const {
-            parameter_base = 0,
-            opcode_base = 0,
+            parameter_base,
+            opcode_base,
             parameters = []
         } = this.attributes;
 
