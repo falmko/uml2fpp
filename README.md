@@ -11,6 +11,33 @@
 
 ## 技术栈
 
-- 前端框架: Gatesby
 - UML 绘图: JointJS
 - XML 处理: xml2js
+
+## 运行
+
+```bash
+# Installation
+# At first, get your copy of JointJS+.
+# If you have a valid license, download JointJS+ from my.jointjs.com. Alternatively, get a free 30-day trial from my.jointjs.com.
+# Unzip the file and navigate to the build/package folder inside.
+# Copy the joint-plus.tgz joint-plus.css file and paste them into the root of package.
+npm add joint-plus.tgz
+npm install
+npm run dev
+```
+
+## 演示
+
+![alt text](assert/image.png)
+
+## References
+
+- https://docs.jointjs.com/learn/quickstart/
+- https://www.jointjs.com/jointjs-plus
+- https://www.jointjs.com/demos/uml-class-diagrams
+- https://www.jointjs.com/demos/uml-class-shape-inspector
+- https://www.jointjs.com/blog/15-community-designed-demo-apps
+
+## 问题及解决
+- 社区提问及解决 https://github.com/clientIO/joint/discussions/2891
