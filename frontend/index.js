@@ -90,8 +90,8 @@ graph.on('remove', function (cell) {
 
 renderMenuTree();
 // 监听menu_tree的改变，更新目录
-window.addEventListener('menu_tree', function (e) {
-    console.log('menu_tree', e.detail);
-    menu_tree = e.detail;
-    renderMenuTree();
-});
+// window.addEventListener('menu_tree', function (e) {
+    // console.log('menu_tree', e.detail);
+    // menu_tree = e.detail;
+    // renderMenuTree();
+// });
