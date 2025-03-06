@@ -11,23 +11,10 @@ export const passByOptions = Object.entries(PassBy).map(([key, value]) => ({
 
 // 将端口类型转换为选项
 export const portKindOptions = Object.entries(PortKind).map(([key, value]) => ({
-    value: value, 
+    value: value,
     content: key
 }));
 
-export class InputPort extends shapes.standard.Rectangle{}
+export class InputPort extends shapes.standard.Rectangle { }
 // 输入端口 三角形
-export class OutputPort extends shapes.standard.Polygon {
-    constructor(options) {
-        super({
-            ...options,
-            body: {
-                points: [
-                    { x: -12, y: -12 },
-                    { x: 12, y: -12 },
-                    { x: 0, y: 10 }
-                ]
-            }
-        });
-    }
-}
+export class OutputPort extends shapes.standard.Polygon {}

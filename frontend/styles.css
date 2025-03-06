@@ -1,23 +1,78 @@
 #paper {
     position: absolute;
     top: 0;
-    right: 20%;
+    right: 10%;
     bottom: 0;
-    left: 380px;
+    left: 250px;
+    display: flex;
 }
 
 #stencil {
     position: absolute;
     top: 0;
-    width: 380px;
+    width: 250px;
+    height: auto;
     bottom: 0;
     left: 0;
+    display: flex;
 }
+#sidebar {
+    position: absolute;
+    height: 50%;
+    width: 245px;
+    bottom: 0;
+    left: 0;
+    height: auto;
+    display: flex;
+    background-color: rgb(218, 238, 231);
+    padding-left: 5px;
+}
+.tree-view {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.tree-item {
+    margin: 8px 0;
+}
+
+.tree-item.main {
+    font-weight: bold;
+    cursor: pointer;
+    color: #3498db;
+}
+
+.tree-item.main:hover {
+    text-decoration: underline;
+}
+
+.sub-tree {
+    list-style-type: none;
+    padding-left: 20px;
+    margin-top: 5px;
+    display: none;
+}
+
+.sub-tree.expanded {
+    display: block;
+}
+
+.tree-item.sub {
+    color: #e74c3c;
+}
+
+.tree-toggle {
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+
 
 #toolbar {
     position: absolute;
     top: 15px;
     left: 380px;
+    display: flex;
 }
 
 #toolbar .joint-toolbar {
@@ -27,11 +82,12 @@
 #inspector {
     background: #333;
     position: absolute;
-    width: 20%;
+    width: 10%;
     height: 100%;
     top: 0;
     right: 0;
     bottom: 0;
+    display: flex;
 }
 
 .inspector-tab {
@@ -58,4 +114,45 @@
 
 .joint-inspector {
     padding: 5px 0 0 0;
+}
+
+#component-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    width: 95%;
+    height: 95%;
+    left: 2.5%;
+    top: 2.5%;
+    background-color: rgba(238, 7, 7, 0.5);
+}
+
+#modal-content {
+    background-color: #fefefe;
+    /* margin: 5% auto; */
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+}
+
+#modal-body {
+    width: 79%;
+    height: 90%;
+    border: 1px solid #ddd;
+}
+
+#sub-toolbar {
+    position: absolute;
+    top: 15px;
+    left: 380px;
+}
+
+#sub-inspector {
+    background: #333;
+    position: absolute;
+    width: 20%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }

@@ -26,8 +26,9 @@ export class ComponentBase extends UMLClass {
             name: "",        // 组件名称
             namespace: "",   // C++ 命名空间 optional
             kind: componentKindOptions[0].content,       // 组件类型 active by default
-            modeler: true,  // 建模器标志 默认自动创建端口
-            comment: ""
+            modeler: false,  // 建模器标志
+            comment: "",
+            specification: "",
         };
     }
 
@@ -44,8 +45,9 @@ export class ComponentBase extends UMLClass {
             name = "",
             namespace = "",
             kind = componentKindOptions[0].content,
-            modeler = true,
-            comment = ""
+            modeler = false,
+            comment = "",
+            specification = ""
         } = this.attributes;
 
         // 构建组件属性项
@@ -54,11 +56,6 @@ export class ComponentBase extends UMLClass {
             {
                 id: 'kind',
                 label: `kind: ${kind}`,
-                icon: this.getVisibilityIcon('+', textColor)
-            },
-            {
-                id: 'modeler',
-                label: `modeler: ${modeler}`,
                 icon: this.getVisibilityIcon('+', textColor)
             }
         );
@@ -122,8 +119,9 @@ export class ComponentBase extends UMLClass {
             name = "",
             namespace = "",
             kind = componentKindOptions[0].content,
-            modeler = true,
-            comment = ""
+            modeler = false,
+            comment = "",
+            specification = ""
         } = this.attributes;
 
         return {
@@ -131,7 +129,8 @@ export class ComponentBase extends UMLClass {
             namespace,
             kind,
             modeler,
-            comment
+            comment,
+            specification
         };
     }
 }

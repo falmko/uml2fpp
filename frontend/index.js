@@ -20,6 +20,8 @@ import { NewPortMoveTool } from './port_move_tool/port_move_tool';
 import { NewCommandManager } from './command_manager/command_manager';
 import { NewPaperScroller } from './paper_scroller/paper_scroller';
 import { CustomLink, customRouter, CustomValidateConnection } from './link/link';
+import { subElements } from './subgraph/subgraph';
+import { renderMenuTree,menu_tree } from './menu_tree/menu_tree';
 
 shapes.UMLClass = UMLClass;
 shapes.UMLClassView = shapes.standard.HeaderedRecordView;
@@ -70,8 +72,26 @@ const commandManager = NewCommandManager(graph);
 
 NewHalo(paper);
 NewSelection(paper);
-NewKeyboard(paper);
+NewKeyboard(graph, paper);
 NewToolbar(paperScroller, commandManager, toolbarContainerEl);
 NewStencil(graph, paper, shapes, stencilContainerEl, inspectorContainer);
 NewPortMoveTool(paper, inspectorContainer);
 NewInspector(paper, inspectorContainer);
+
+// listen delete event and remove the element from subElements
+graph.on('remove', function (cell) {
+    if (cell.attributes.classType == "Component") {
+        const id = cell.id;
+        if (subElements.has(id)) {
+            subElements.delete(id);
+        }
+    }
+});
+
+renderMenuTree();
+// 监听menu_tree的改变，更新目录
+window.addEventListener('menu_tree', function (e) {
+    console.log('menu_tree', e.detail);
+    menu_tree = e.detail;
+    renderMenuTree();
+});

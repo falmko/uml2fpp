@@ -1,6 +1,6 @@
 import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/plus';
 
-let selection = null;
+export var selection = null;
 let region = null;
 
 export function getSelection(){

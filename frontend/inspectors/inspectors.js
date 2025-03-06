@@ -67,14 +67,19 @@ export const inspectorConfigs = {
                 },
                 modeler: {
                     type: "toggle",
-                    group: "basic",
-                    label: "Modeler",
+                    group: "advanced",
+                    label: "Modeler(optional)",
                     defaultValue: false
                 },
                 comment: {
                     type: "textarea",
                     group: "basic",
                     label: "Comment"
+                },
+                specification: {
+                    type: "textarea",
+                    group: "advanced",
+                    label: "LTL Specification"
                 }
             }
         }

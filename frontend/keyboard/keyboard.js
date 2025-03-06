@@ -1,9 +1,10 @@
 import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/plus';
 import { getSelection } from '../selection/selection';
+
 let clipboard = null;
 let keyboard = null;
 
-export function NewKeyboard(paper) {
+export function NewKeyboard(graph,paper) {
     clipboard = new ui.Clipboard({ useLocalStorage: false });
     keyboard = new ui.Keyboard;
     // 

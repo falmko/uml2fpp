@@ -1,87 +1,195 @@
-import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/plus';
+import { dia, shapes, ui, format, util, highlighters, mvc, V, g, layout } from '@joint/plus';
 import { queueFullOptions } from '../shapes/commands';
 import { portKindOptions } from '../shapes/port';
-import {componentKindOptions} from '../shapes/compoent_base';
+import { componentKindOptions } from '../shapes/compoent_base';
 import { addElementPort } from '../port_move_tool/port_move_tool';
 import { showPortInspector } from '../inspectors/inspectors';
+import { createFprimeArchitectureLayout } from '../shapes/fprime_architecture';
 // Stencil
-// -------
+// const stencilElements = [
 
-const stencilElements = [
-
-    // 添加 ComponentBase 配置
-    {
-        type: 'ComponentBase',
-        size: { width: 300 },
-        name: "Component",
-        className: "ComponentClass",
-        classType: "Component",
-        kind: componentKindOptions[0].content,
-        modeler: true
-    },
-    // 添加 Parameters 配置
-    {
-        type: 'Parameters',
-        size: { width: 300 },
-        name: "Parameters",
-        className: "ParametersClass",
-        classType: "Parameters",
-        color: "#E0F7FA",
-        headerColor: "#B2EBF2",
-        outlineColor: "#00ACC1",
-        textColor: "#006064",
-        itemHeight: 25,
-    },
-    // 添加 Events 配置
-    {
-        type: 'Events',
-        size: { width: 300 },
-        name: "Events",
-        className: "EventsClass",
-        classType: "Events",
-        color: "#F3E5F5",
-        headerColor: "#E1BEE7",
-        outlineColor: "#7B1FA2",
-        textColor: "#4A148C",
-        itemHeight: 25,
-    },
-    // 添加 Commands 配置
-    {
-        type: 'Commands',
-        size: { width: 300 },
-        name: "Commands",
-        className: "CommandsClass",
-        classType: "Commands",
-        color: "#E8F5E9",
-        headerColor: "#C8E6C9",
-        outlineColor: "#43A047",
-        textColor: "#1B5E20",
-        itemHeight: 25,
-    },
-    // 添加 Telemetry 配置
-    {
-        type: 'Telemetry',
-        size: { width: 300 },
-        name: "Telemetry",
-        className: "TelemetryClass",
-        classType: "Telemetry",
-        color: "#E1F5FE",
-        headerColor: "#B3E5FC",
-        outlineColor: "#0288D1",
-        textColor: "#01579B",
-        itemHeight: 25,
-    },
-];
+//     // 添加 ComponentBase 配置
+//     {
+//         type: 'ComponentBase',
+//         size: { width: 300 },
+//         name: "Component",
+//         className: "ComponentClass",
+//         classType: "Component",
+//         kind: componentKindOptions[0].content,
+//         modeler: true
+//     },
+//     // 添加 Parameters 配置
+//     {
+//         type: 'Parameters',
+//         size: { width: 300 },
+//         name: "Parameters",
+//         className: "ParametersClass",
+//         classType: "Parameters",
+//         color: "#E0F7FA",
+//         headerColor: "#B2EBF2",
+//         outlineColor: "#00ACC1",
+//         textColor: "#006064",
+//         itemHeight: 25,
+//     },
+//     // 添加 Events 配置
+//     {
+//         type: 'Events',
+//         size: { width: 300 },
+//         name: "Events",
+//         className: "EventsClass",
+//         classType: "Events",
+//         color: "#F3E5F5",
+//         headerColor: "#E1BEE7",
+//         outlineColor: "#7B1FA2",
+//         textColor: "#4A148C",
+//         itemHeight: 25,
+//     },
+//     // 添加 Commands 配置
+//     {
+//         type: 'Commands',
+//         size: { width: 300 },
+//         name: "Commands",
+//         className: "CommandsClass",
+//         classType: "Commands",
+//         color: "#E8F5E9",
+//         headerColor: "#C8E6C9",
+//         outlineColor: "#43A047",
+//         textColor: "#1B5E20",
+//         itemHeight: 25,
+//     },
+//     // 添加 Telemetry 配置
+//     {
+//         type: 'Telemetry',
+//         size: { width: 300 },
+//         name: "Telemetry",
+//         className: "TelemetryClass",
+//         classType: "Telemetry",
+//         color: "#E1F5FE",
+//         headerColor: "#B3E5FC",
+//         outlineColor: "#0288D1",
+//         textColor: "#01579B",
+//         itemHeight: 25,
+//     }
+// ];
 
 // Every stencil port element has to have a `port` property.
 // The `port` property describes the port itself after it's dropped on the paper.
-const stencilPorts = [
+// const stencilPorts = [
+//     {
+//         // 同步输入端口
+//         type: "InputPort",
+//         size: { width: 24, height: 24 },
+//         attrs: {
+//             body: { fill: "#ff9580" }
+//         },
+//         port: {
+//             markup: util.svg/*xml*/ `
+//                 <rect @selector="portBody"
+//                     x="-12" y="-12" width="24" height="24"
+//                     fill="#ff9580" stroke="#333333" stroke-width="2" magnet="active"
+//                 />
+//             `,
+//             properties: {
+//                 name: "syncInput",
+//                 kind: portKindOptions[0].value,
+//                 namespace: "",
+//                 priority: null,
+//                 max_number: null,
+//                 full: queueFullOptions[0].value,
+//                 role: "",
+//                 comment: "Synchronous input port",
+//                 args: [],
+//                 return: null,
+//                 classType: "InputPort",
+//                 type: "InputPort"
+//             }
+//         }
+//     },
+//     {
+//         // 输出端口
+//         type: "OutputPort",
+//         size: { width: 24, height: 24 },
+//         attrs: {
+//             body: {
+//                 fill: "#80ff95",
+//             }
+//         },
+//         port: {
+//             markup: util.svg/*xml*/ `
+//                 <polygon @selector="portBody"
+//                     points="-12,-12 12,-12 0,12"
+//                     fill="#80ff95" stroke="#333333" stroke-width="2" magnet="active"
+//                 />
+//             `,
+//             properties: {
+//                 name: "output",
+//                 kind: portKindOptions[3].value,
+//                 namespace: "",
+//                 priority: null,
+//                 max_number: null,
+//                 full: null,
+//                 role: "",
+//                 comment: "Output port",
+//                 args: [],
+//                 return: null,
+//                 classType: "OutputPort",
+//                 type: "OutputPort"
+//             }
+//         }
+//     }
+
+
+// ];
+
+const stencilArchitectures = [
     {
-        // 同步输入端口
+        type: 'standard.Path',
+        isArchitecture: true, // 标记为架构类型
+        size: { width: 40, height: 130 },
+        attrs: {
+            body: {
+                d: "M 51.2 97.28 a 46.08 46.08 90 1 0 0 -92.16 a 46.08 46.08 90 0 0 0 92.16 z M 40.96 34.0684 v -13.312 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 18.432 c 0.5632 0 1.024 0.4608 1.024 1.024 v 13.312 a 1.024 1.024 90 0 1 -1.024 1.024 H 41.984 a 1.024 1.024 90 0 1 -1.024 -1.024 z m 6.7482 14.9964 H 30.6176 a 1.024 1.024 90 0 0 -1.024 1.024 v 12.4724 a 2.5088 2.5088 90 1 1 -5.0176 0 V 45.4348 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 22.1082 a 1.024 1.024 90 0 0 1.024 -1.024 v -4.3264 a 2.5088 2.5088 90 0 1 5.0176 0 v 4.3264 c 0 0.5632 0.4608 1.024 1.024 1.024 h 21.5962 c 0.5632 0 1.024 0.4608 1.024 1.024 v 17.1264 a 2.5088 2.5088 90 1 1 -5.0176 0 V 50.089 a 1.024 1.024 90 0 0 -1.024 -1.024 h -16.5786 a 1.024 1.024 90 0 0 -1.024 1.024 v 12.4724 a 2.5088 2.5088 90 0 1 -5.0176 0 V 50.089 a 1.024 1.024 90 0 0 -1.024 -1.024 z m 19.6762 27.7094 v -8.192 c 0 -0.5632 0.4556 -1.024 1.024 -1.024 h 13.312 c 0.5632 0 1.024 0.4608 1.024 1.024 v 8.192 a 1.024 1.024 90 0 1 -1.024 1.024 h -13.312 a 1.024 1.024 90 0 1 -1.024 -1.024 z m -23.6492 0 v -8.192 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 13.312 c 0.5632 0 1.024 0.4608 1.024 1.024 v 8.192 a 1.024 1.024 90 0 1 -1.024 1.024 h -13.312 a 1.024 1.024 90 0 1 -1.024 -1.024 z m -24.2228 0 v -8.192 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 13.312 c 0.5632 0 1.024 0.4608 1.024 1.024 v 8.192 a 1.024 1.024 90 0 1 -1.024 1.024 h -13.312 a 1.024 1.024 90 0 1 -1.024 -1.024 z",
+                fill: "#000000"
+            },
+            label: {
+                text: "FPrime Architecture",
+                fill: "#000000",
+                x: 50,
+                y: 120,
+            }
+        }
+    }
+];
+
+const defaultElements = [
+    {
+        type: 'standard.Path',
+        isComponent: true, // 标记为组件类型
+        size: { width: 50, height: 100 },
+        attrs: {
+            body: {
+                d: "M 55.296 66.816 H 9.216 A 2.304 2.304 90 0 1 6.912 64.512 V 18.432 A 2.304 2.304 90 0 1 9.216 16.128 H 23.3165 A 9.5386 9.5386 90 0 1 23.04 13.824 A 9.216 9.216 90 0 1 41.472 13.824 A 9.5386 9.5386 90 0 1 41.1955 16.128 H 55.296 A 2.304 2.304 90 0 1 57.6 18.432 V 32.5325 A 9.5386 9.5386 90 0 1 59.904 32.256 A 9.216 9.216 90 0 1 59.904 50.688 A 9.5386 9.5386 90 0 1 57.6 50.4115 V 64.512 A 2.304 2.304 90 0 1 55.296 66.816 Z M 11.52 62.208 H 52.992 V 46.5869 A 2.3501 2.3501 90 0 1 54.3744 44.4672 A 2.3501 2.3501 90 0 1 56.8166 44.8819 A 4.608 4.608 90 1 0 56.8166 38.0621 A 2.2579 2.2579 90 0 1 54.3744 38.4768 A 2.3501 2.3501 90 0 1 52.992 36.3571 V 20.736 H 37.3709 A 2.3501 2.3501 90 0 1 35.2512 19.3536 A 2.2579 2.2579 90 0 1 35.6659 16.9114 A 4.608 4.608 90 1 0 28.8461 16.9114 A 2.2579 2.2579 90 0 1 29.2608 19.3536 A 2.3501 2.3501 90 0 1 27.1411 20.736 H 11.52 Z",
+                fill: "#4D4D4D"
+            },
+            label: {
+                text: "Component",
+                fill: "#000000",
+                x: 35,
+                y: 80,
+            }
+        }
+    },
+    {
+        // 输入端口
         type: "InputPort",
         size: { width: 24, height: 24 },
         attrs: {
-            body: { fill: "#ff9580" }
+            body: { fill: "#ff9580" },
+            label: {
+                text: "inport",
+                fill: "#000000",
+                x: 50,
+            }
         },
         port: {
             markup: util.svg/*xml*/ `
@@ -109,10 +217,15 @@ const stencilPorts = [
     {
         // 输出端口
         type: "OutputPort",
-        size: { width: 24, height: 24 },
+        size: { width:24, height: 24 },
         attrs: {
-            body: { 
+            body: {
                 fill: "#80ff95",
+            },
+            label: {
+                text: "outport",
+                fill: "#000000",
+                x: 55,
             }
         },
         port: {
@@ -138,35 +251,35 @@ const stencilPorts = [
             }
         }
     }
+]
 
-    
-];
+// TODO 从文件中导入组件到组件库、导出组件到组件库
 
-stencilElements.forEach(
-    (element) =>
-    (element.ports = {
-        groups: {
-            absolute: {
-                position: "absolute",
-                label: {
-                    position: { name: "inside", args: { offset: 22 } },
-                    markup: util.svg/*xml*/ `
-                    <text @selector="portLabel"
-                        y="0.3em"
-                        fill="#333"
-                        text-anchor="middle"
-                        font-size="15"
-                        font-family="sans-serif"
-                    />
-                `
-                }
-            }
-        },
-        items: []
-    })
-);
+// stencilElements.forEach(
+//     (element) =>
+//     (element.ports = {
+//         groups: {
+//             absolute: {
+//                 position: "absolute",
+//                 label: {
+//                     position: { name: "inside", args: { offset: 22 } },
+//                     markup: util.svg/*xml*/ `
+//                     <text @selector="portLabel"
+//                         y="0.3em"
+//                         fill="#333"
+//                         text-anchor="middle"
+//                         font-size="15"
+//                         font-family="sans-serif"
+//                     />
+//                 `
+//                 }
+//             }
+//         },
+//         items: []
+//     })
+// );
 
-export function NewStencil(graph, paper,cellViewNamespace,stencilContainerEl,inspectorContainer) {
+export function NewStencil(graph, paper, cellViewNamespace, stencilContainerEl, inspectorContainer) {
     const stencil = new ui.Stencil({
         paper,
         usePaperGrid: true,
@@ -182,8 +295,11 @@ export function NewStencil(graph, paper,cellViewNamespace,stencilContainerEl,ins
             };
         },
         groups: {
-            elements: {},
-            ports: {}
+            // elements: {},
+            // ports: {},
+            default: {},
+            architectures: {},
+            component_lib: {}
         },
         layout: {
             columns: 1,
@@ -191,10 +307,6 @@ export function NewStencil(graph, paper,cellViewNamespace,stencilContainerEl,ins
             rowGap: 10,
             marginX: 40,
             marginY: 10,
-            // reset defaults
-            resizeToFit: false,
-            dx: 0,
-            dy: 0
         },
         usePaperGrid: true,
         dragStartClone: (cell) => {
@@ -215,14 +327,19 @@ export function NewStencil(graph, paper,cellViewNamespace,stencilContainerEl,ins
     stencilContainerEl.appendChild(stencil.el);
 
     stencil.load({
-        elements: stencilElements,
-        ports: stencilPorts
+        // elements: stencilElements,
+        // ports: stencilPorts,
+        default: defaultElements,
+        architectures: stencilArchitectures
     });
 
     stencil.on({
         "element:dragstart": (cloneView, evt) => {
             const clone = cloneView.model;
+            // 通过事件数据传递信息
             evt.data.isPort = clone.get("port");
+            evt.data.isArchitecture = clone.get("isArchitecture");
+            evt.data.isComponent = clone.get("isComponent");
             paper.removeTools();
         },
         "element:dragstart element:drag": (cloneView, evt, cloneArea) => {
@@ -258,30 +375,72 @@ export function NewStencil(graph, paper,cellViewNamespace,stencilContainerEl,ins
             }
         },
         "element:dragend": (cloneView, evt, cloneArea) => {
-            if (!evt.data.isPort) {
-                return;
-            }
-            const clone = cloneView.model;
-            const { dropTarget } = evt.data;
-            // 确保放置目标为 ComponentBase 类型
-            if (dropTarget && dropTarget instanceof shapes.ComponentBase) {
+            if (evt.data.isPort) {
+                const clone = cloneView.model;
+                const { dropTarget } = evt.data;
+                // 确保放置目标为 ComponentBase 类型
+                if (dropTarget && dropTarget instanceof shapes.ComponentBase) {
+                    stencil.cancelDrag();
+                    const portId = addElementPort(
+                        dropTarget,
+                        clone.get("port"),
+                        cloneArea.topLeft().difference(dropTarget.position()).toJSON()
+                    );
+
+                    // 稍微延迟显示端口Inspector，确保DOM已更新
+                    setTimeout(() => {
+                        showPortInspector(dropTarget, portId, inspectorContainer);
+                    }, 100);
+                } else {
+                    // An invalid drop target. Animate the port back to the stencil.
+                    stencil.cancelDrag({ dropAnimation: true });
+                }
+                highlighters.mask.removeAll(paper, "valid-drop-target");
+            } else if (evt.data.isArchitecture) {
+                // 创建架构布局
                 stencil.cancelDrag();
-                const portId = addElementPort(
-                    dropTarget,
-                    clone.get("port"),
-                    cloneArea.topLeft().difference(dropTarget.position()).toJSON()
-                );
-                
-                // 稍微延迟显示端口Inspector，确保DOM已更新
-                setTimeout(() => {
-                    showPortInspector(dropTarget, portId,inspectorContainer);
-                }, 100);
-            } else {
-                // An invalid drop target. Animate the port back to the stencil.
-                stencil.cancelDrag({ dropAnimation: true });
+                const components = createFprimeArchitectureLayout(cloneArea.center());
+                components.forEach((component) => {
+                    graph.addCell(component);
+                });
+            } else if (evt.data.isComponent) {
+                stencil.cancelDrag();
+                const component = new shapes.ComponentBase({
+                    size: { width: 300, height: 200 },
+                    position: cloneArea.center(),
+                    name: "Component1",
+                    type: 'ComponentBase',
+
+                    className: "ComponentClass",
+                    classType: "Component",
+                    kind: componentKindOptions[0].content,
+                    modeler: false
+                });
+
+                // add port move tool
+                component.set('ports', {
+                    groups: {
+                        absolute: {
+                            position: "absolute",
+                            label: {
+                                position: { name: "inside", args: { offset: 22 } },
+                                markup: util.svg/*xml*/ `
+                                <text @selector="portLabel"
+                                    y="0.3em"
+                                    fill="#333"
+                                    text-anchor="middle"
+                                    font-size="15"
+                                    font-family="sans-serif"
+                                />
+                            `
+                            }
+                        }
+                    },
+                    items: []
+                });
+                graph.addCell(component);
             }
-            highlighters.mask.removeAll(paper, "valid-drop-target");
+
         }
     });
-    
 }
