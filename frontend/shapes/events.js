@@ -22,7 +22,8 @@ export class Events extends UMLClass {
             padding: { top: 40, left: 10, right: 10, bottom: 10 },
             events: [],  // Event 数组
             classType: "Events",
-            className: ""
+            className: "",
+            parent_id: "",
         };
     }
 
@@ -35,6 +36,7 @@ export class Events extends UMLClass {
             headerColor,
             classType = "Events",
             className = "",
+            parent_id = "",
             events = []
         } = this.attributes;
 

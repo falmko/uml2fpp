@@ -393,7 +393,7 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
                     className: "EventsClass",
                     classType: "Events",
                     position: { x: 100, y: 100 },
-                    
+                    parent_id: selectedCell.id,
                 });
                 const telemetry = new Telemetry({
                     type: 'Telemetry',
@@ -402,7 +402,7 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
                     className: "TelemetryClass",
                     classType: "Telemetry",
                     position: { x: 100, y: 300 },
-                    
+                    parent_id: selectedCell.id,
                 });
                 const parameters = new Parameters({
                     type: 'Parameters',
@@ -411,7 +411,7 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
                     className: "ParametersClass",
                     classType: "Parameters",
                     position: { x: 420, y: 100 },
-                    
+                    parent_id: selectedCell.id,
                 });
                 const commands = new Commands({
                     type: 'Commands',
@@ -420,7 +420,7 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
                     className: "CommandsClass",
                     classType: "Commands",
                     position: { x: 420, y: 300 },
-                    
+                    parent_id: selectedCell.id,
                 });
                 const link1 = new Composition({
                     source: { id: selectedCell.id },
@@ -444,24 +444,43 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
                 });
 
                 subElements.set(selectedCell.id, {
-                    events: events,
-                    telemetry: telemetry,
-                    parameters: parameters,
-                    commands: commands,
-                    links: [link1, link2, link3, link4],
+                    Events: events,
+                    Telemetry: telemetry,
+                    Parameters: parameters,
+                    Commands: commands,
+                    Links: [link1, link2, link3, link4],
                 });
             }
             const subElementsData = subElements.get(selectedCell.id);
 
             // 添加元素
             subGraph.addCell(selectedCell);
-            subGraph.addCell(subElementsData.events);
-            subGraph.addCell(subElementsData.telemetry);
-            subGraph.addCell(subElementsData.parameters);
-            subGraph.addCell(subElementsData.commands);
-            subElementsData.links.forEach(link => {
-                subGraph.addCell(link);
-            });
+            // Check if subElementsData has Events property before adding it
+            if (subElementsData.Events) {
+                subGraph.addCell(subElementsData.Events);
+            }
+            
+            // Check if subElementsData has Telemetry property before adding it
+            if (subElementsData.Telemetry) {
+                subGraph.addCell(subElementsData.Telemetry);
+            }
+            
+            // Check if subElementsData has Parameters property before adding it
+            if (subElementsData.Parameters) {
+                subGraph.addCell(subElementsData.Parameters);
+            }
+            
+            // Check if subElementsData has Commands property before adding it
+            if (subElementsData.Commands) {
+                subGraph.addCell(subElementsData.Commands);
+            }
+            
+            // Check if subElementsData has Links property before adding them
+            if (subElementsData.Links) {
+                subElementsData.Links.forEach(link => {
+                    subGraph.addCell(link);
+                });
+            }
             // 显示弹窗
             document.getElementById('component-modal').style.display = 'block';
         }

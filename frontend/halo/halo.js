@@ -18,7 +18,13 @@ export function NewSubHalo(paper){
     });
 }
 
-export function openSubHalo(cellView) {
+function openSubHalo(cellView) {
+    if (cellView.model.attributes.classType == "Component") {
+        new ui.Halo({
+            cellView: cellView,
+        }).removeHandle('clone').removeHandle('fork').removeHandle('unlink').removeHandle('rotate').removeHandle('link').removeHandle('remove').render();
+        return;
+    }
     new ui.Halo({
         cellView: cellView,
     }).removeHandle('clone').removeHandle('fork').removeHandle('unlink').removeHandle('rotate').removeHandle('link').render();

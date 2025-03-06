@@ -30,7 +30,8 @@ export class Telemetry extends UMLClass {
             telemetry_base: undefined,
             channels: [],
             classType: "Telemetry",
-            className: ""
+            className: "",
+            parent_id: "",
         };
     }
 
@@ -43,6 +44,7 @@ export class Telemetry extends UMLClass {
             headerColor,
             classType = "Telemetry",
             className = "",
+            parent_id = "",
             telemetry_base = "",
             channels = []
         } = this.attributes;

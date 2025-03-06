@@ -20,7 +20,8 @@ export class Parameters extends UMLClass {
             opcode_base: undefined,
             parameters: [],
             classType: "Parameters",
-            className: ""
+            className: "",
+            parent_id: ""
         };
     }
 
@@ -33,6 +34,7 @@ export class Parameters extends UMLClass {
             headerColor,
             classType = "Parameters",
             className = "",
+            parent_id = "",
 
             parameter_base,
             opcode_base,

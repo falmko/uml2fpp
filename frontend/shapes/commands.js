@@ -30,7 +30,8 @@ export class Commands extends UMLClass {
             commands: [],  // Command 数组
             opcode_base: undefined,
             classType: "Commands",
-            className: ""
+            className: "",
+            parent_id: "",
         };
     }
 
@@ -43,6 +44,7 @@ export class Commands extends UMLClass {
             headerColor,
             classType = "Commands",
             className = "",
+            parent_id = "",
             commands = [],
             opcode_base
         } = this.attributes;
