@@ -20,7 +20,8 @@ export class Parameters extends UMLClass {
             opcode_base: undefined,
             parameters: [],
             classType: "Parameters",
-            className: ""
+            className: "",
+            parent_id: ""
         };
     }
 
@@ -33,6 +34,7 @@ export class Parameters extends UMLClass {
             headerColor,
             classType = "Parameters",
             className = "",
+            parent_id = "",
 
             parameter_base,
             opcode_base,
@@ -137,18 +139,10 @@ export class Parameters extends UMLClass {
             parameters = []
         } = this.attributes;
 
-        // 转换参数列表，将 data_type 数字转换为具体类型名称
-        const convertedParameters = parameters.map(param => ({
-            ...param,
-            data_type_name: fppTypeOptions[param.data_type]?.content || 'unknown',
-            // 保留原始的 data_type 数值
-            data_type: param.data_type
-        }));
-
         return {
             parameter_base,
             opcode_base,
-            parameters: convertedParameters
+            parameters
         };
     }
 }

@@ -1,20 +1,34 @@
-import { ui,dia } from '@joint/plus';
+import { ui, dia, highlighters } from '@joint/plus';
 import { componentKindOptions } from '../shapes/compoent_base';
 import { commandKindOptions, queueFullOptions } from '../shapes/commands';
-import { fppTypeOptions,updateTypeOptions } from '../shapes/telemetry';
-import { CommandKind} from '../models/command';
+import { fppTypeOptions, updateTypeOptions } from '../shapes/telemetry';
+import { CommandKind } from '../models/command';
 import { severityOptions } from '../shapes/events';
-import { portKindOptions } from '../shapes/port';
+import { portKindOptions,portColors } from '../shapes/port';
 import { PortKind } from '../models/port';
 import { passByOptions } from '../shapes/port';
-import { PassBy } from '../types/arg';
+
+/**
+ * Inspector 模块 - 用于管理和创建元素属性检查器
+ */
 
 // 当前inspector实例
 let currentInspectors = null;
-// 获取Inspector容器
 
+/**
+ * 初始化Inspector及其事件监听
+ * @param {Object} paper - JointJS paper对象
+ * @param {HTMLElement} inspectorContainer - 包含Inspector的DOM元素
+ */
+export function NewInspector(paper, inspectorContainer) {
+    // 设置事件监听
+    setupEventListeners(paper, inspectorContainer);
+}
 
-export function NewInspector(paper,inspectorContainer){
+/**
+ * 设置Inspector相关的所有事件监听器
+ */
+function setupEventListeners(paper, inspectorContainer) {
     // 点击元素时创建inspector
     paper.on('element:pointerclick', (elementView, evt) => {
         if (getCurrentInspectors()) {
@@ -22,11 +36,13 @@ export function NewInspector(paper,inspectorContainer){
         }
         createInspector(elementView.model, inspectorContainer);
     });
+
     // 点击空白处隐藏inspector
     paper.on('blank:pointerclick', () => {
         inspectorContainer.style.display = 'none';
         setCurrentInspectors(null);
     });
+
     // Tab切换事件监听
     inspectorContainer.addEventListener('click', (evt) => {
         if (evt.target.classList.contains('inspector-tab-button')) {
@@ -35,15 +51,244 @@ export function NewInspector(paper,inspectorContainer){
     });
 }
 
+/**
+ * 获取当前活动的Inspector实例
+ * @returns {Object|null} 当前Inspector实例
+ */
 export function getCurrentInspectors() {
     return currentInspectors;
 }
+
+/**
+ * 设置当前活动的Inspector实例
+ * @param {Object|null} inspectors - Inspector实例
+ */
 export function setCurrentInspectors(inspectors) {
     currentInspectors = inspectors;
 }
 
+/**
+ * 根据元素类型创建适当的Inspector
+ * @param {Object} cell - JointJS cell对象
+ * @param {HTMLElement} inspectorContainer - 包含Inspector的DOM元素
+ * @returns {Object|null} 创建的Inspector对象或null
+ */
+export function createInspector(cell, inspectorContainer) {
+    if (!cell) return null;
+
+    const classType = cell.get('classType') || cell.get('type');
+    const config = inspectorConfigs[classType];
+    if (!config) return null;
+
+    // 清空容器
+    inspectorContainer.innerHTML = '';
+
+    // 创建UI组件
+    createTabButtons(config.tabs, inspectorContainer);
+    const inspectors = createTabContents(config, cell, inspectorContainer);
+
+    // 显示Inspector并激活第一个标签
+    inspectorContainer.style.display = 'block';
+    openTab(`inspector-${config.tabs[0]}`);
+
+    currentInspectors = inspectors;
+    return inspectors;
+}
+
+/**
+ * 创建标签页按钮
+ * @param {Array} tabs - 标签页名称数组
+ * @param {HTMLElement} container - 容器元素
+ */
+function createTabButtons(tabs, container) {
+    const tabButtons = document.createElement('div');
+    tabButtons.className = 'inspector-tabs';
+
+    tabs.forEach(tabName => {
+        const button = document.createElement('button');
+        button.className = 'inspector-tab-button';
+        button.dataset.inspector = `inspector-${tabName}`;
+        button.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+        tabButtons.appendChild(button);
+    });
+
+    container.appendChild(tabButtons);
+}
+
+/**
+ * 创建标签页内容
+ * @param {Object} config - Inspector配置
+ * @param {Object} cell - JointJS cell对象
+ * @param {HTMLElement} container - 容器元素
+ * @returns {Object} 创建的Inspector对象集合
+ */
+function createTabContents(config, cell, container) {
+    const inspectors = {};
+
+    config.tabs.forEach(tabName => {
+        const tabContent = document.createElement('div');
+        tabContent.id = `inspector-${tabName}`;
+        tabContent.className = 'inspector-tab';
+        container.appendChild(tabContent);
+
+        const inspector = new ui.Inspector({
+            cell: cell,
+            inputs: config.inputs[tabName],
+            groups: {
+                basic: { label: '基本属性', index: 1 },
+                advanced: { label: '高级属性', index: 2 }
+            },
+            operators: getCustomOperators()
+        });
+
+        inspector.render();
+        tabContent.appendChild(inspector.el);
+        inspectors[tabName] = inspector;
+    });
+
+    return inspectors;
+}
+
+/**
+ * 获取自定义操作符
+ * @returns {Object} 操作符对象
+ */
+function getCustomOperators() {
+    return {
+        kindequal: function (cell, value, prop, _valuePath) {
+            const kindValue = cell.prop(_valuePath);
+            return kindValue === prop;
+        },
+        notnull: function (cell, value, prop, _valuePath) {
+            return value !== undefined && value !== null;
+        }
+    };
+}
+
+/**
+ * 切换标签页
+ * @param {string} tabName - 要显示的标签页ID
+ */
+export function openTab(tabName) {
+    // 切换标签页内容显示
+    const tabs = document.getElementsByClassName('inspector-tab');
+    Array.from(tabs).forEach(tab => {
+        tab.style.display = tab.id === tabName ? 'block' : 'none';
+    });
+
+    // 切换按钮样式
+    const buttons = document.getElementsByClassName('inspector-tab-button');
+    Array.from(buttons).forEach(button => {
+        button.classList.toggle('active', button.dataset.inspector === tabName);
+    });
+}
+
+/**
+ * 显示端口的Inspector
+ * @param {Object} element - 包含端口的元素
+ * @param {string} portId - 端口ID
+ * @param {HTMLElement} inspectorContainer - Inspector容器
+ */
+export function showPortInspector(element, portId, inspectorContainer) {
+    if (!element || !portId) return;
+
+    const port = element.getPort(portId);
+    if (!port) return;
+
+    // 创建临时模型供Inspector使用
+    const tempModel = createPortTempModel(port);
+    if (!tempModel) return;
+
+    // 准备Inspector容器
+    preparePortInspectorContainer(port, inspectorContainer);
+
+    // 创建Inspector
+    createInspector(tempModel, inspectorContainer);
+
+    // 监听属性变更
+    setupPortChangeListener(tempModel, element, portId);
+
+    // 显示Inspector
+    inspectorContainer.style.display = 'block';
+}
+
+/**
+ * 为端口创建临时模型
+ * @param {Object} port - 端口对象
+ * @returns {Object} 临时JointJS模型
+ */
+function createPortTempModel(port) {
+    const classType = port.properties.classType;
+    if (classType !== 'InputPort' && classType !== 'OutputPort') return null;
+
+    return new dia.Cell({
+        id: `port-${port.id}`,
+        type: classType,
+        classType: classType,
+        ...JSON.parse(JSON.stringify(port.properties))
+    });
+}
+
+/**
+ * 准备端口Inspector容器
+ * @param {Object} port - 端口对象
+ * @param {HTMLElement} container - Inspector容器
+ */
+function preparePortInspectorContainer(port, container) {
+    // 清空容器
+    container.innerHTML = '';
+
+    // 添加标题
+    const titleElem = document.createElement('div');
+    titleElem.className = 'inspector-title';
+    titleElem.textContent = `编辑端口: ${port.properties.name}`;
+    container.appendChild(titleElem);
+}
+
+/**
+ * 设置端口属性变更监听器
+ * @param {Object} tempModel - 临时模型
+ * @param {Object} element - 包含端口的元素
+ * @param {string} portId - 端口ID
+ */
+function setupPortChangeListener(tempModel, element, portId) {
+    tempModel.on('change', function (model, opt) {
+        // 确保有有效的变更信息
+        if (!opt || !opt.propertyPath || opt.propertyValue === undefined) return;
+
+        // 更新端口属性
+        element.portProp(portId, `properties/${opt.propertyPath}`, opt.propertyValue);
+
+        // 处理特殊属性更新
+        handleSpecialPortPropertyChange(element, portId, opt);
+    });
+}
+
+/**
+ * 处理端口特殊属性变更
+ * @param {Object} element - 包含端口的元素
+ * @param {string} portId - 端口ID
+ * @param {Object} opt - 变更选项
+ */
+function handleSpecialPortPropertyChange(element, portId, opt) {
+    const propertyPath = opt.propertyPath;
+    const propertyValue = opt.propertyValue;
+
+    if (propertyPath === 'name') {
+        // 更新显示的标签
+        element.portProp(portId, 'attrs/portLabel/text', propertyValue);
+    } else if (propertyPath === 'kind') {
+        // 更新端口颜色
+        element.portProp(
+            portId,
+            'attrs/portBody/fill',
+            portColors[propertyValue] || '#ff9580'
+        );
+    }
+}
+
 // Inspector配置对象
-export const inspectorConfigs = {
+const inspectorConfigs = {
     'Component': {
         tabs: ['general'],
         inputs: {
@@ -161,7 +406,7 @@ export const inspectorConfigs = {
                                         size: {
                                             type: "number",
                                             label: "Size(string only)",
-                                            when: { eq: { 'commands/${index}/args/${index}/type': 'string' }}, // string
+                                            when: { eq: { 'commands/${index}/args/${index}/type': 'string' } }, // string
                                             defaultValue: 20
                                         }
                                     }
@@ -222,7 +467,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size(string only)",
                                 index: 4,
-                                when: { eq: { 'channels/${index}/data_type': "string" }}, // string类型
+                                when: { eq: { 'channels/${index}/data_type': "string" } }, // string类型
                                 defaultValue: 20
                             },
                             update_type: {
@@ -298,7 +543,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size(string only)",
                                 index: 4,
-                                when: { eq: { 'parameters/${index}/data_type': 'string' }}, // string类型
+                                when: { eq: { 'parameters/${index}/data_type': 'string' } }, // string类型
                                 defaultValue: 20
                             },
                             default: {
@@ -391,7 +636,7 @@ export const inspectorConfigs = {
                                         size: {
                                             type: "number",
                                             label: "Size(string only)",
-                                            when: { eq: { 'events/${index}/args/${index}/type': 'string' }}, // string
+                                            when: { eq: { 'events/${index}/args/${index}/type': 'string' } }, // string
                                             defaultValue: 20
                                         }
                                     }
@@ -481,7 +726,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size (string only)",
                                 index: 3,
-                                when: { eq: { 'args/${index}/type': 'string' }}, // string类型索引
+                                when: { eq: { 'args/${index}/type': 'string' } }, // string类型索引
                                 defaultValue: 20
                             },
                             pass_by: {
@@ -510,7 +755,7 @@ export const inspectorConfigs = {
                             type: "select",
                             options: passByOptions,
                             label: "Pass By",
-                            when: { notnull: { 'return/type': null }  },
+                            when: { notnull: { 'return/type': null } },
                         }
                     }
                 }
@@ -576,7 +821,7 @@ export const inspectorConfigs = {
                                 type: "number",
                                 label: "Size (string only)",
                                 index: 3,
-                                when: { eq: { 'args/${index}/type': 'string' }}, // string类型索引
+                                when: { eq: { 'args/${index}/type': 'string' } }, // string类型索引
                                 defaultValue: 20
                             },
                             pass_by: {
@@ -605,7 +850,7 @@ export const inspectorConfigs = {
                             type: "select",
                             options: passByOptions,
                             label: "Pass By",
-                            when: { notnull: { 'return/type': null }  },
+                            when: { notnull: { 'return/type': null } },
                         }
                     }
                 }
@@ -613,150 +858,3 @@ export const inspectorConfigs = {
         }
     }
 };
-
-// Inspector创建函数
-export function createInspector(cell, inspectorContainer) {
-    if (!cell) return null;
-
-    const classType = cell.get('classType') || cell.get('type');
-    const config = inspectorConfigs[classType];
-    if (!config) return null;
-
-    inspectorContainer.innerHTML = '';
-
-    // 创建tab按钮
-    const tabButtons = document.createElement('div');
-    tabButtons.className = 'inspector-tabs';
-    config.tabs.forEach(tabName => {
-        const button = document.createElement('button');
-        button.className = 'inspector-tab-button';
-        button.dataset.inspector = `inspector-${tabName}`;
-        button.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-        tabButtons.appendChild(button);
-    });
-    inspectorContainer.appendChild(tabButtons);
-
-    // 创建tab内容
-    let inspectors = {};
-    config.tabs.forEach(tabName => {
-        const tabContent = document.createElement('div');
-        tabContent.id = `inspector-${tabName}`;
-        tabContent.className = 'inspector-tab';
-        inspectorContainer.appendChild(tabContent);
-
-        const inspector = new ui.Inspector({
-            cell: cell,
-            inputs: config.inputs[tabName],
-            groups: {
-                basic: { label: '基本属性', index: 1 },
-                advanced: { label: '高级属性', index: 2 }
-            },
-            operators: {
-                kindequal: function (cell, value, prop, _valuePath) {
-                    // 这里获取当前cell中的kind属性值
-                    const kindValue = cell.prop(_valuePath);
-                    
-                    // 检查kind是否等于我们期望的值（在这里是"ASYNC"）
-                    return kindValue === prop;
-                },
-                notnull: function (cell, value, prop, _valuePath) {
-
-                    if (value === undefined||value === null) {
-                        return false
-                    }
-                    return true;
-                }
-            }
-        });
-        inspector.render();
-        tabContent.appendChild(inspector.el);
-        inspectors[tabName] = inspector;
-    });
-
-    inspectorContainer.style.display = 'block';
-    openTab(`inspector-${config.tabs[0]}`);
-
-    currentInspectors = inspectors;
-}
-
-// Tab切换函数
-export function openTab(tabName) {
-    const tabs = document.getElementsByClassName('inspector-tab');
-    for (let tab of tabs) {
-        tab.style.display = tab.id === tabName ? 'block' : 'none';
-    }
-
-    const buttons = document.getElementsByClassName('inspector-tab-button');
-    for (let button of buttons) {
-        button.classList.toggle('active', button.dataset.inspector === tabName);
-    }
-}
-
-export function showPortInspector(element, portId, inspectorContainer) {
-    if (!element || !portId) return;
-    let _element = element;
-    
-    const port = _element.getPort(portId);
-    if (!port) return;
-    
-    let tempModel = null;
-    if (port.properties.classType === 'InputPort') {
-        // 创建临时模型以供Inspector使用
-        tempModel = new dia.Cell({
-            id: `port-${portId}`,
-            type: 'InputPort',
-            classType: 'InputPort',  // 添加classType以匹配inspectorConfigs的键
-            // 展开端口属性，确保每个属性都是顶级属性
-            ...JSON.parse(JSON.stringify(port.properties))
-        });
-    }else{
-        // 创建临时模型以供Inspector使用
-        tempModel = new dia.Cell({
-            id: `port-${portId}`,
-            type: 'OutputPort',
-            classType: 'OutputPort',  // 添加classType以匹配inspectorConfigs的键
-            // 展开端口属性，确保每个属性都是顶级属性
-            ...JSON.parse(JSON.stringify(port.properties))
-        });
-    }
-    // 清空容器
-    inspectorContainer.innerHTML = '';
-    
-    // 添加标题
-    const titleElem = document.createElement('div');
-    titleElem.className = 'inspector-title';
-    titleElem.textContent = `编辑端口: ${port.properties.name}`;
-    inspectorContainer.appendChild(titleElem);
-    
-    // 创建Inspector
-    createInspector(tempModel, inspectorContainer);
-
-    tempModel.on('change', function(element, opt) {
-        console.log("tempModel change", element, opt);
-        
-        // 确保有有效的变更信息
-        if (!opt || !opt.propertyPath || opt.propertyValue === undefined) return;
-        
-        // 更新端口属性
-        _element.portProp(portId, `properties/${opt.propertyPath}`, opt.propertyValue);
-        
-        // 处理特殊属性
-        if (opt.propertyPath === 'name') {
-            // 如果是名称，同时更新显示的标签
-            _element.portProp(portId, 'attrs/portLabel/text', opt.propertyValue);
-        } else if (opt.propertyPath === 'kind') {
-            // 如果是端口类型，更新端口颜色和形状
-            const portColors = {
-                'SYNC_INPUT': '#ff9580',
-                'GUARDED_INPUT': '#ffc880',
-                'ASYNC_INPUT': '#ffff80',
-                'OUTPUT': '#80ff95'
-            };
-            _element.portProp(portId, 'attrs/portBody/fill', portColors[opt.propertyValue] || '#ff9580');
-        }
-        
-    });
-    
-    // 显示Inspector
-    inspectorContainer.style.display = 'block';
-}

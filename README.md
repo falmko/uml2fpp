@@ -12,16 +12,25 @@
 ## 技术栈
 
 - UML 绘图: JointJS
-- XML 处理: xml2js
+- 后端: Flask
 
 ## 运行
-
+**backend**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python router.py
+```
+**frontend**
 ```bash
 # Installation
 # At first, get your copy of JointJS+.
 # If you have a valid license, download JointJS+ from my.jointjs.com. Alternatively, get a free 30-day trial from my.jointjs.com.
 # Unzip the file and navigate to the build/package folder inside.
 # Copy the joint-plus.tgz joint-plus.css file and paste them into the root of package.
+cd frontend
 npm add joint-plus.tgz
 npm install
 npm run dev
@@ -29,7 +38,10 @@ npm run dev
 
 ## 演示
 
-![alt text](assert/image.png)
+**主编辑页面**
+![alt text](assert/index.png)
+**子图页面**
+![alt text](assert/subgraph.png)
 
 ## References
 

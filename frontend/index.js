@@ -21,7 +21,7 @@ import { NewCommandManager } from './command_manager/command_manager';
 import { NewPaperScroller } from './paper_scroller/paper_scroller';
 import { CustomLink, customRouter, CustomValidateConnection } from './link/link';
 import { subElements } from './subgraph/subgraph';
-import { renderMenuTree,menu_tree } from './menu_tree/menu_tree';
+import { menuTreeManager, NewMenuTreeManager } from './menu_tree/menu_tree';
 
 shapes.UMLClass = UMLClass;
 shapes.UMLClassView = shapes.standard.HeaderedRecordView;
@@ -44,13 +44,14 @@ const paperContainerEl = document.getElementById("paper");
 const stencilContainerEl = document.getElementById("stencil");
 const toolbarContainerEl = document.getElementById("toolbar");
 const inspectorContainer = document.getElementById('inspector');
+const menuTreeContainer = document.getElementById('component-tree');
 
 // Paper
 // -----
 const paper = new dia.Paper({
     model: graph,
     cellViewNamespace: shapes,
-    width: 2000,
+    width: 2560,
     height: 1440,
     gridSize: 20,
     drawGrid: { name: "mesh" },
@@ -77,6 +78,9 @@ NewToolbar(paperScroller, commandManager, toolbarContainerEl);
 NewStencil(graph, paper, shapes, stencilContainerEl, inspectorContainer);
 NewPortMoveTool(paper, inspectorContainer);
 NewInspector(paper, inspectorContainer);
+// 初始化menu_tree
+NewMenuTreeManager(graph,paper,paperScroller,null,menuTreeContainer);
+
 
 // listen delete event and remove the element from subElements
 graph.on('remove', function (cell) {
@@ -87,11 +91,59 @@ graph.on('remove', function (cell) {
         }
     }
 });
+// 监听graph的add、remove事件，更新menu_tree
+graph.on('add', function (cell) {
+    if (cell.attributes.classType) {
+        const classType = cell.attributes.classType;
+        const id = cell.id;
+        const name = cell.attributes.name || `${classType}_${id}`;
+        menuTreeManager.updateData(`${classType}.${classType}_${id}.name`, name);
 
-renderMenuTree();
-// 监听menu_tree的改变，更新目录
-window.addEventListener('menu_tree', function (e) {
-    console.log('menu_tree', e.detail);
-    menu_tree = e.detail;
-    renderMenuTree();
+        if (cell.attributes.ports) {
+            const ports = cell.attributes.ports.items;
+            if (ports.length > 0) {
+                const toAddPorts = [];
+                ports.forEach(port => {
+                    toAddPorts.push({
+                        id: port.id,
+                        name: port.properties.name || port.properties.kind + "_" + port.id,
+                    });
+                });
+                menuTreeManager.updateData(`${classType}.${classType}_${id}.ports`, toAddPorts);
+            }
+        }
+    }
+});
+
+graph.on('change', function (cell) {
+    if (cell instanceof shapes.ComponentBase) {
+        const classType = cell.attributes.classType;
+        const id = cell.id;
+        if (cell.changed.name && cell.changed.name.length > 0) {
+            const name = cell.changed.name;
+            menuTreeManager.updateData(`${classType}.${classType}_${id}.name`, name);
+        } else if (cell.changed.ports) {
+            const ports = cell.changed.ports.items;
+            if (ports.length > 0) {
+                const toAddPorts = [];
+                ports.forEach(port => {
+                    toAddPorts.push({
+                        id: port.id,
+                        name: port.properties.name || port.properties.kind + "_" + port.id,
+                    });
+                });
+                menuTreeManager.updateData(`${classType}.${classType}_${id}.ports`, toAddPorts);
+            } else {
+                menuTreeManager.deleteData(`${classType}.${classType}_${id}.ports`);
+            }
+        }
+    }
+});
+
+graph.on('remove', function (cell) {
+    if (cell.attributes.classType) {
+        const classType = cell.attributes.classType;
+        const id = cell.id;
+        menuTreeManager.deleteData(`${classType}.${classType}_${id}`);
+    }
 });

@@ -1,33 +1,12 @@
-import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/plus';
+import { dia, util, mvc, V, g } from '@joint/plus';
 import { getCurrentInspectors, setCurrentInspectors, showPortInspector } from '../inspectors/inspectors';
+import { portColors, generatePortId, createDefaultPortProps } from '../shapes/port';
 
-let portIdCounter = 1;
 export function addElementPort(element, port, position) {
-    const portId = `P-${portIdCounter++}`;
-    // 端口默认属性，基于Port模型
-    const defaultPortProps = {
-        name: portId,                // 端口名称
-        kind: "SYNC_INPUT",          // 端口类型（同步/异步输入、输出）
-        namespace: "",               // C++命名空间（可选）
-        priority: null,              // 异步端口的优先级（可选）
-        max_number: null,            // 此类型端口的最大数量（可选）
-        full: "ASSERT",              // 异步端口队列满时的行为（可选）
-        role: "",                    // 建模时的端口角色（可选）
-        comment: "",                 // 端口描述注释
-        args: [],                    // 端口参数列表
-        return: null,                // 返回值类型（可选）
-    };
-
     // 从port.properties合并可能存在的属性
-    const properties = {...defaultPortProps, ...port.properties};
+    const portId = generatePortId()
+    const properties = { ...createDefaultPortProps(), ...port.properties };
     // 根据端口类型设置不同的颜色
-    const portColors = {
-        'SYNC_INPUT': '#ff9580',     // 同步输入端口为红色
-        'GUARDED_INPUT': '#ffc880',  // 保护输入端口为橙色
-        'ASYNC_INPUT': '#ffff80',    // 异步输入端口为黄色
-        'OUTPUT': '#80ff95'          // 输出端口为绿色
-    };
-
     const portColor = portColors[properties.kind] || portColors.SYNC_INPUT;
 
     element.addPort({
@@ -282,7 +261,7 @@ export const Ports = dia.ToolView.extend({
     }
 });
 
-export function NewPortMoveTool(paper,inspectorContainer){
+export function NewPortMoveTool(paper, inspectorContainer) {
     // paperContainerEl.appendChild(paper.el);
     // 监听点击端口事件，添加端口工具
     paper.on("element:magnet:pointerclick", (elementView, evt, magnet) => {
@@ -292,15 +271,15 @@ export function NewPortMoveTool(paper,inspectorContainer){
         // 获取端口ID
         const portId = magnet.getAttribute('port');
         if (!portId) return;
-    
+
         // 清除当前Inspector
         if (getCurrentInspectors()) {
             inspectorContainer.style.display = 'none';
             setCurrentInspectors(null);
         }
-    
+
         // 显示端口Inspector
-        showPortInspector(elementView.model, portId,inspectorContainer);
+        showPortInspector(elementView.model, portId, inspectorContainer);
     });
     // 监听点击空白处事件，移除所有工具
     paper.on("blank:pointerdown cell:pointerdown", () => {
@@ -312,3 +291,24 @@ export function NewPortMoveTool(paper,inspectorContainer){
         }
     });
 }
+
+export const defaultPortsConfig = {
+    groups: {
+        absolute: {
+            position: "absolute",
+            label: {
+                position: { name: "inside", args: { offset: 22 } },
+                markup: util.svg/*xml*/ `
+                    <text @selector="portLabel"
+                        y="0.3em"
+                        fill="#333"
+                        text-anchor="middle"
+                        font-size="15"
+                        font-family="sans-serif"
+                    />
+                `
+            }
+        }
+    },
+    items: []
+};

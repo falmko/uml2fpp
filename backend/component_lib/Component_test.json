@@ -1,0 +1,246 @@
+{
+  "name": "Component123——lib",
+  "namespace": "",
+  "kind": "ACTIVE",
+  "modeler": false,
+  "comment": "",
+  "specification": "1111[]",
+  "ports": {
+    "groups": {
+      "absolute": {
+        "position": "absolute",
+        "label": {
+          "position": {
+            "name": "inside",
+            "args": {
+              "offset": 22
+            }
+          },
+          "markup": [
+            {
+              "namespaceURI": "http://www.w3.org/2000/svg",
+              "tagName": "text",
+              "style": {},
+              "selector": "portLabel",
+              "attributes": {
+                "y": "0.3em",
+                "fill": "#333",
+                "text-anchor": "middle",
+                "font-size": "15",
+                "font-family": "sans-serif"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "items": [
+      {
+        "id": "P-1",
+        "group": "absolute",
+        "args": {
+          "x": 0,
+          "y": 40
+        },
+        "properties": {
+          "name": "syncInput",
+          "kind": "SYNC_INPUT",
+          "namespace": "",
+          "priority": null,
+          "max_number": null,
+          "full": "ASSERT",
+          "role": "",
+          "comment": "Synchronous input port",
+          "args": [
+            {
+              "name": "port1_arg1",
+              "type": "U8",
+              "size": 20,
+              "pass_by": "DEFAULT"
+            }
+          ],
+          "return": {
+            "type": "bool"
+          },
+          "classType": "InputPort",
+          "type": "InputPort"
+        },
+        "markup": [
+          {
+            "namespaceURI": "http://www.w3.org/2000/svg",
+            "tagName": "rect",
+            "style": {},
+            "selector": "portBody",
+            "attributes": {
+              "x": "-12",
+              "y": "-12",
+              "width": "24",
+              "height": "24",
+              "fill": "#ff9580",
+              "stroke": "#333333",
+              "stroke-width": "2",
+              "magnet": "active"
+            }
+          }
+        ],
+        "attrs": {
+          "portBody": {
+            "fill": "#ff9580"
+          },
+          "portLabel": {
+            "text": "syncInput"
+          }
+        }
+      },
+      {
+        "id": "P-2",
+        "group": "absolute",
+        "args": {
+          "x": 300,
+          "y": 20
+        },
+        "properties": {
+          "name": "output",
+          "kind": "OUTPUT",
+          "namespace": "",
+          "priority": null,
+          "max_number": null,
+          "full": null,
+          "role": "aa",
+          "comment": "Output port",
+          "args": [
+            {
+              "name": "",
+              "type": "U8",
+              "size": 20,
+              "pass_by": "DEFAULT"
+            },
+            {
+              "name": "",
+              "type": "U8",
+              "size": 20,
+              "pass_by": "DEFAULT"
+            },
+            {
+              "name": "",
+              "type": "U8",
+              "size": 20,
+              "pass_by": "DEFAULT"
+            }
+          ],
+          "return": null,
+          "classType": "OutputPort",
+          "type": "OutputPort"
+        },
+        "markup": [
+          {
+            "namespaceURI": "http://www.w3.org/2000/svg",
+            "tagName": "polygon",
+            "style": {},
+            "selector": "portBody",
+            "attributes": {
+              "points": "-12,-12 12,-12 0,12",
+              "fill": "#80ff95",
+              "stroke": "#333333",
+              "stroke-width": "2",
+              "magnet": "active"
+            }
+          }
+        ],
+        "attrs": {
+          "portBody": {
+            "fill": "#80ff95"
+          },
+          "portLabel": {
+            "text": "output"
+          }
+        }
+      }
+    ]
+  },
+  "Events": {
+    "events": [
+      {
+        "name": "event",
+        "event_id": "0",
+        "severity": "DIAGNOSTIC",
+        "format_string": "",
+        "comment": "",
+        "args": [
+          {
+            "name": "arg",
+            "type": "U8",
+            "size": 20
+          },
+          {
+            "name": "arg",
+            "type": "U8",
+            "size": 20
+          }
+        ]
+      }
+    ]
+  },
+  "Telemetry": {
+    "telemetry_base": 0,
+    "channels": [
+      {
+        "name": "channel",
+        "channel_id": "",
+        "data_type": "U8",
+        "size": 20,
+        "update_type": "ALWAYS",
+        "abbrev": "ch",
+        "comment": ""
+      }
+    ]
+  },
+  "Parameters": {
+    "parameters": [
+      {
+        "name": "param",
+        "parameter_id": "",
+        "data_type": "U8",
+        "size": 20,
+        "default": "",
+        "set_opcode": "",
+        "save_opcode": "",
+        "comment": ""
+      },
+      {
+        "name": "param",
+        "parameter_id": "",
+        "data_type": "U8",
+        "size": 20,
+        "default": "",
+        "set_opcode": "",
+        "save_opcode": "",
+        "comment": ""
+      }
+    ]
+  },
+  "Commands": {
+    "commands": [
+      {
+        "mnemonic": "cmd",
+        "kind": "SYNC",
+        "opcode": "0",
+        "priority": 1,
+        "full": "ASSERT",
+        "comment": "",
+        "args": [
+          {
+            "name": "arg1",
+            "type": "U8",
+            "size": 20
+          },
+          {
+            "name": "arg2",
+            "type": "U8",
+            "size": 20
+          }
+        ]
+      }
+    ]
+  }
+}

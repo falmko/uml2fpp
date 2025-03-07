@@ -1,4 +1,4 @@
-import { dia, shapes, ui, format, util } from '@joint/plus';
+import { util } from '@joint/plus';
 import { UMLClass } from './shapes';
 import {ComponentKind} from '../models/component';
 
@@ -29,6 +29,7 @@ export class ComponentBase extends UMLClass {
             modeler: false,  // 建模器标志
             comment: "",
             specification: "",
+            ports: {}
         };
     }
 
@@ -47,7 +48,8 @@ export class ComponentBase extends UMLClass {
             kind = componentKindOptions[0].content,
             modeler = false,
             comment = "",
-            specification = ""
+            specification = "",
+            ports
         } = this.attributes;
 
         // 构建组件属性项
@@ -121,7 +123,8 @@ export class ComponentBase extends UMLClass {
             kind = componentKindOptions[0].content,
             modeler = false,
             comment = "",
-            specification = ""
+            specification = "",
+            ports
         } = this.attributes;
 
         return {
@@ -130,7 +133,8 @@ export class ComponentBase extends UMLClass {
             kind,
             modeler,
             comment,
-            specification
+            specification,
+            ports
         };
     }
 }

@@ -4,7 +4,7 @@ import { getSelection } from '../selection/selection';
 let clipboard = null;
 let keyboard = null;
 
-export function NewKeyboard(graph,paper) {
+export function NewKeyboard(graph, paper) {
     clipboard = new ui.Clipboard({ useLocalStorage: false });
     keyboard = new ui.Keyboard;
     // 

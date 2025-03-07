@@ -4,8 +4,9 @@ import { Events } from '../shapes/events';
 import { Telemetry } from '../shapes/telemetry';
 import { Parameters } from '../shapes/parameters';
 import { Commands } from '../shapes/commands';
-import { subGraph, subElements } from '../subgraph/subgraph';
+import { subGraph, subElements, createSubElement,elementTypes } from '../subgraph/subgraph';
 import { Composition } from '../shapes/link';
+import { UMLClass } from '../shapes/shapes';
 
 export function getToolbar() {
     return toolbar;
@@ -383,85 +384,51 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
     toolbar.on('open:pointerclick', () => {
         const selectedCell = selection.collection.models[0];
         if (selectedCell && selectedCell.attributes.classType === 'Component') {
-            console.log(subGraph.getCells());
             if (!subElements.has(selectedCell.id)) {
-                // 创建子元素和连接
-                const events = new Events({
-                    type: 'Events',
-                    size: { width: 300 },
-                    name: "Events",
-                    className: "EventsClass",
-                    classType: "Events",
-                    position: { x: 100, y: 100 },
-                    
-                });
-                const telemetry = new Telemetry({
-                    type: 'Telemetry',
-                    size: { width: 300 },
-                    name: "Telemetry",
-                    className: "TelemetryClass",
-                    classType: "Telemetry",
-                    position: { x: 100, y: 300 },
-                    
-                });
-                const parameters = new Parameters({
-                    type: 'Parameters',
-                    size: { width: 300 },
-                    name: "Parameters",
-                    className: "ParametersClass",
-                    classType: "Parameters",
-                    position: { x: 420, y: 100 },
-                    
-                });
-                const commands = new Commands({
-                    type: 'Commands',
-                    size: { width: 300 },
-                    name: "Commands",
-                    className: "CommandsClass",
-                    classType: "Commands",
-                    position: { x: 420, y: 300 },
-                    
-                });
-                const link1 = new Composition({
-                    source: { id: selectedCell.id },
-                    target: { id: events.id },
-                    
-                });
-                const link2 = new Composition({
-                    source: { id: selectedCell.id },
-                    target: { id: telemetry.id },
-                    
-                });
-                const link3 = new Composition({
-                    source: { id: selectedCell.id },
-                    target: { id: parameters.id },
-                    
-                });
-                const link4 = new Composition({
-                    source: { id: selectedCell.id },
-                    target: { id: commands.id },
-                    
+                // 使用createSubElement函数创建子元素和连接
+                const subElementsInstances = {};
+                const links = [];
+
+                // 为每种类型创建子元素和连接
+                elementTypes.forEach(elementType => {
+                    // 创建空数据结构作为默认值
+                    const componentData = {
+                        Events: { events: [] },
+                        Telemetry: { channels: [], telemetry_base: 0 },
+                        Parameters: { parameters: [] },
+                        Commands: { commands: [] }
+                    };
+
+                    const result = createSubElement(componentData, elementType, selectedCell.id);
+
+                    if (result) {
+                        subElementsInstances[elementType] = result.element;
+                        links.push(result.link);
+                    }
                 });
 
-                subElements.set(selectedCell.id, {
-                    events: events,
-                    telemetry: telemetry,
-                    parameters: parameters,
-                    commands: commands,
-                    links: [link1, link2, link3, link4],
-                });
+                // 将创建的子元素和连接添加到subElements
+                subElementsInstances.Links = links;
+                subElements.set(selectedCell.id, subElementsInstances);
             }
             const subElementsData = subElements.get(selectedCell.id);
 
             // 添加元素
             subGraph.addCell(selectedCell);
-            subGraph.addCell(subElementsData.events);
-            subGraph.addCell(subElementsData.telemetry);
-            subGraph.addCell(subElementsData.parameters);
-            subGraph.addCell(subElementsData.commands);
-            subElementsData.links.forEach(link => {
-                subGraph.addCell(link);
+
+            // 使用数组循环替代重复代码
+            elementTypes.forEach(elementType => {
+                if (subElementsData[elementType]) {
+                    subGraph.addCell(subElementsData[elementType]);
+                }
             });
+
+            // 添加连接
+            if (subElementsData.Links) {
+                subElementsData.Links.forEach(link => {
+                    subGraph.addCell(link);
+                });
+            }
             // 显示弹窗
             document.getElementById('component-modal').style.display = 'block';
         }
@@ -497,12 +464,39 @@ export function NewSubToolbar(paperScroller, commandManager, toolbarContainerEl)
     toolbarContainerEl.appendChild(toolbar.render().el);
     // 保存组件到组件库
     toolbar.on('component:pointerclick', () => {
-        // TODO 
+        // TODO 获取画布中的所有元素并导出为json文件
+        // 获取画布中的所有元素
+        const allCells = subGraph.getCells();
+        // 获取组件类-子图中只有一个组件
+        const componentBaseCell = allCells.filter(cell => cell.attributes.classType === 'Component')[0];
+        let componentData = componentBaseCell.getProperties();
+        // 获取所有子元素
+        const subElementsData = subElements.get(componentBaseCell.id);
+        for (const key in subElementsData) {
+            if (subElementsData.hasOwnProperty(key)) {
+                const element = subElementsData[key];
+                if (element instanceof UMLClass) {
+                    componentData[key] = element.getProperties();
+                }
+            }
+        }
+
+        // Serialize JSON
+        const json = JSON.stringify(componentData, null, 2);
+        // console.log(json);
+        // Download JSON file
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${componentData.name.replace(/\s+/g, '_')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        // TODO save to backend
+
     });
     // 关闭子画布
     toolbar.on('close:pointerclick', () => {
-        console.log(subElements);
-
         const subElementsToRemove = subGraph.getCells().filter(cell => {
             cell.attributes.classType !== 'Component'
         });
