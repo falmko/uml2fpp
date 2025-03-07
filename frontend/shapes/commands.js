@@ -167,21 +167,10 @@ export class Commands extends UMLClass {
             commands = []
         } = this.attributes;
 
-        // 转换命令列表，保持原始属性并添加额外信息
-        const convertedCommands = commands.map(cmd => ({
-            ...cmd,
-            // 添加枚举值的可读名称
-            kind_name: CommandKind[cmd.kind] || 'sync',
-            full_name: cmd.kind === CommandKind.ASYNC ?
-                (QueueFull[cmd.full] || 'assert') : undefined,
-            // 保留原始值
-            kind: cmd.kind,
-            full: cmd.full
-        }));
 
         return {
             opcode_base,
-            commands: convertedCommands
+            commands
         };
     }
 }

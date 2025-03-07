@@ -1,0 +1,8 @@
+{
+    "Components": [
+        {
+            "name": "Component_test",
+            "path": "Component_test.json"
+        }
+    ]
+}

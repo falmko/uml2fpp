@@ -87,14 +87,28 @@ graph.on('remove', function (cell) {
         }
     }
 });
-// TODO 添加元素、删除元素、添加端口\删除端口、创建子图、删除子图中元素时更新menu_tree
 // 监听graph的add、remove事件，更新menu_tree
 graph.on('add', function (cell) {
+    console.log(cell);
     if (cell.attributes.classType) {
         const classType = cell.attributes.classType;
         const id = cell.id;
         const name = cell.attributes.name || `${classType}_${id}`;
         menuTreeManager.updateData(`${classType}.${classType}_${id}.name`, name);
+
+        if (cell.attributes.ports) {
+            const ports = cell.attributes.ports.items;
+            if (ports.length > 0) {
+                const toAddPorts = [];
+                ports.forEach(port => {
+                    toAddPorts.push({
+                        id: port.id,
+                        name: port.properties.name || port.properties.kind + "_" + port.id,
+                    });
+                });
+                menuTreeManager.updateData(`${classType}.${classType}_${id}.ports`, toAddPorts);
+            }
+        }
     }
 });
 

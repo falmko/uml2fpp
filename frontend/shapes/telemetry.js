@@ -147,21 +147,9 @@ export class Telemetry extends UMLClass {
             channels = []
         } = this.attributes;
 
-        // 转换通道列表，添加可读的类型名称
-        const convertedChannels = channels.map(channel => ({
-            ...channel,
-            // 添加数据类型的可读名称
-            data_type_name: fppTypeOptions[channel.data_type]?.content || 'unknown',
-            // 添加更新类型的可读名称
-            update_type_name: updateTypeOptions[channel.update_type]?.content || 'unknown',
-            // 保留原始值
-            data_type: channel.data_type,
-            update_type: channel.update_type
-        }));
-
         return {
             telemetry_base,
-            channels: convertedChannels
+            channels
         };
     }
 }

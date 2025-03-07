@@ -135,17 +135,9 @@ export class Events extends UMLClass {
             events = []
         } = this.attributes;
 
-        // 转换事件列表，添加可读的严重程度名称
-        const convertedEvents = events.map(event => ({
-            ...event,
-            // 添加严重程度的可读名称
-            severity_name: Severity[event.severity] || 'unknown',
-            // 保留原始值
-            severity: event.severity
-        }));
 
         return {
-            events: convertedEvents
+            events
         };
     }
 }

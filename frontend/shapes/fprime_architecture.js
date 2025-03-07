@@ -1,6 +1,6 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
-
 import { ComponentBase } from './compoent_base';
+import { defaultPortsConfig } from '../port_move_tool/port_move_tool';
 
 export class FprimeArchitectureComponent extends ComponentBase {
     defaults() {
@@ -21,6 +21,7 @@ export class FprimeArchitectureComponent extends ComponentBase {
             name: "Component",        // 组件名称
         };
     }
+    
     buildItems(opt = {}) {
         const thickness = 2;
         const {
@@ -28,7 +29,6 @@ export class FprimeArchitectureComponent extends ComponentBase {
             outlineColor,
             textColor,
             headerColor,
-
             classType = "FprimeArchitecture",
             className = "FprimeArchitectureComponent",
             name = "Component",
@@ -37,6 +37,7 @@ export class FprimeArchitectureComponent extends ComponentBase {
         let headerHeight = 30;
         const headerText = `<<${classType}>>\n${name}`;
         headerHeight *= 2;
+        
         this.set({
             padding: { top: headerHeight },
             attrs: util.defaultsDeep({
@@ -78,104 +79,52 @@ export class FprimeArchitectureComponent extends ComponentBase {
 }
 
 export function createFprimeArchitectureLayout(position) {
-    const components = [];
-
-    // Create components in a two-column layout
-    const columnWidth = 260; // Component width
-    const componentHeight = 50; // Component height
-    const horizontalSpacing = 10; // Space between columns
-    const verticalSpacing = 20; // Space between rows
-
-    // First column components (left side)
-    const controlComponent = new FprimeArchitectureComponent({
-        position: { x: position.x - columnWidth/2 - horizontalSpacing/2, y: position.y },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Control",
-        isArchitectureComponent: true,
-    });
-    components.push(controlComponent);
-
-    const collectComponent = new FprimeArchitectureComponent({
-        position: { x: position.x - columnWidth/2 - horizontalSpacing/2, y: position.y + (componentHeight + verticalSpacing) },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Collect",
-        isArchitectureComponent: true,
-    });
-    components.push(collectComponent);
-
-    const processComponent = new FprimeArchitectureComponent({
-        position: { x: position.x - columnWidth/2 - horizontalSpacing/2, y: position.y + 2 * (componentHeight + verticalSpacing) },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Process",
-        isArchitectureComponent: true,
-    });
-    components.push(processComponent);
-
-    const coreComponent = new FprimeArchitectureComponent({
-        position: { x: position.x - columnWidth/2 - horizontalSpacing/2, y: position.y + 3 * (componentHeight + verticalSpacing) },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Core",
-        isArchitectureComponent: true,
-    });
-    components.push(coreComponent);
-
-    // Second column components (right side)
-    const startComponent = new FprimeArchitectureComponent({
-        position: { x: position.x + columnWidth/2 + horizontalSpacing/2, y: position.y },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Start",
-        isArchitectureComponent: true,
-    });
-    components.push(startComponent);
-
-    const diagnoseComponent = new FprimeArchitectureComponent({
-        position: { x: position.x + columnWidth/2 + horizontalSpacing/2, y: position.y + (componentHeight + verticalSpacing) },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Diagnose",
-        isArchitectureComponent: true,
-    });
-    components.push(diagnoseComponent);
-
-    const executionComponent = new FprimeArchitectureComponent({
-        position: { x: position.x + columnWidth/2 + horizontalSpacing/2, y: position.y + 2 * (componentHeight + verticalSpacing) },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Execution",
-        isArchitectureComponent: true,
-    });
-    components.push(executionComponent);
-
-    const calculateComponent = new FprimeArchitectureComponent({
-        position: { x: position.x + columnWidth/2 + horizontalSpacing/2, y: position.y + 3 * (componentHeight + verticalSpacing) },
-        size: { width: columnWidth, height: componentHeight },
-        name: "Calculate",
-        isArchitectureComponent: true,
-    });
-    components.push(calculateComponent);
-
-    components.forEach((component) => {
-        // add port move tool
-        component.set('ports', {
-            groups: {
-                absolute: {
-                    position: "absolute",
-                    label: {
-                        position: { name: "inside", args: { offset: 22 } },
-                        markup: util.svg/*xml*/ `
-                        <text @selector="portLabel"
-                            y="0.3em"
-                            fill="#333"
-                            text-anchor="middle"
-                            font-size="15"
-                            font-family="sans-serif"
-                        />
-                    `
-                    }
-                }
+    // 配置参数
+    const columnWidth = 260;   // 组件宽度
+    const componentHeight = 50; // 组件高度
+    const horizontalSpacing = 10; // 列间距
+    const verticalSpacing = 20;   // 行间距
+    
+    // 定义组件配置
+    const componentConfigs = [
+        // 第一列组件（左侧）
+        { name: "Control", column: 0, row: 0 },
+        { name: "Collect", column: 0, row: 1 },
+        { name: "Process", column: 0, row: 2 },
+        { name: "Core", column: 0, row: 3 },
+        
+        // 第二列组件（右侧）
+        { name: "Start", column: 1, row: 0 },
+        { name: "Diagnose", column: 1, row: 1 },
+        { name: "Execution", column: 1, row: 2 },
+        { name: "Calculate", column: 1, row: 3 },
+    ];
+    
+    // 创建组件辅助函数
+    function createComponent(config) {
+        const { name, column, row } = config;
+        const xOffset = column === 0 
+            ? -columnWidth/2 - horizontalSpacing/2  // 左列
+            : columnWidth/2 + horizontalSpacing/2;  // 右列
+            
+        return new FprimeArchitectureComponent({
+            position: { 
+                x: position.x + xOffset, 
+                y: position.y + row * (componentHeight + verticalSpacing) 
             },
-            items: []
+            size: { width: columnWidth, height: componentHeight },
+            name,
+            isArchitectureComponent: true,
         });
+    }
+    
+    // 批量创建组件
+    const components = componentConfigs.map(createComponent);
+    
+    // 为所有组件添加端口配置
+    components.forEach((component) => {
+        component.set('ports', defaultPortsConfig);
     });
 
-    // 返回创建的组件
     return components;
 }

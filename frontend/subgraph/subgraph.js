@@ -6,6 +6,10 @@ import { NewCommandManager } from '../command_manager/command_manager';
 import { NewPaperScroller } from '../paper_scroller/paper_scroller';
 import { CustomLink, customRouter, CustomValidateConnection } from '../link/link';
 import { menuTreeManager } from '../menu_tree/menu_tree';
+import { Events } from '../shapes/events';
+import { Telemetry } from '../shapes/telemetry';
+import { Parameters } from '../shapes/parameters';
+import { Commands } from '../shapes/commands';
 
 export var subElements = new Map();
 
@@ -118,3 +122,62 @@ subGraph.on('remove', function (cell) {
         }
     }
 });
+
+// 定义要创建的子元素类型
+export const elementTypes = ['Events', 'Telemetry', 'Parameters', 'Commands'];
+
+// 定义子元素位置
+const positions = {
+    'Events': { x: 100, y: 100 },
+    'Telemetry': { x: 100, y: 300 },
+    'Parameters': { x: 420, y: 100 },
+    'Commands': { x: 420, y: 300 }
+};
+
+// 确定类和数据属性名称
+const classMapping = {
+    'Events': { class: Events, dataKey: 'events', dataField: 'events' },
+    'Telemetry': { class: Telemetry, dataKey: 'Telemetry', dataField: 'channels', extraField: 'telemetry_base' },
+    'Parameters': { class: Parameters, dataKey: 'Parameters', dataField: 'parameters' },
+    'Commands': { class: Commands, dataKey: 'Commands', dataField: 'commands' }
+};
+
+// 提取创建子元素和连接的函数
+export function createSubElement(componentData, elementType, componentId) {
+
+
+    const mapping = classMapping[elementType];
+    if (!mapping) return null;
+
+    // 准备创建实例的配置
+    const config = {
+        type: elementType,
+        size: { width: 300 },
+        name: elementType,
+        className: `${elementType}Class`,
+        classType: elementType,
+        position: elementType?positions[elementType]:{ x: 100, y: 100 },
+        parent_id: componentId
+    };
+
+    // 添加特定属性
+    if (mapping.extraField && componentData[mapping.dataKey][mapping.extraField] !== undefined) {
+        config[mapping.extraField] = componentData[mapping.dataKey][mapping.extraField];
+    }
+
+    // 添加主数据数组
+    if (componentData[mapping.dataKey] && componentData[mapping.dataKey][mapping.dataField]) {
+        config[mapping.dataField] = componentData[mapping.dataKey][mapping.dataField] || [];
+    }
+
+    // 创建实例
+    const element = new mapping.class(config);
+
+    // 创建连接
+    const link = new shapes.Composition({
+        source: { id: componentId },
+        target: { id: element.id }
+    });
+
+    return { element, link };
+}
