@@ -1,4 +1,4 @@
-import { ui, dia } from '@joint/plus';
+import { ui, dia, highlighters } from '@joint/plus';
 import { componentKindOptions } from '../shapes/compoent_base';
 import { commandKindOptions, queueFullOptions } from '../shapes/commands';
 import { fppTypeOptions, updateTypeOptions } from '../shapes/telemetry';

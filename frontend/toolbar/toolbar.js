@@ -384,9 +384,6 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
     toolbar.on('open:pointerclick', () => {
         const selectedCell = selection.collection.models[0];
         if (selectedCell && selectedCell.attributes.classType === 'Component') {
-            console.log(subGraph.getCells());
-            
-            
             if (!subElements.has(selectedCell.id)) {
                 // 使用createSubElement函数创建子元素和连接
                 const subElementsInstances = {};
@@ -483,7 +480,7 @@ export function NewSubToolbar(paperScroller, commandManager, toolbarContainerEl)
                 }
             }
         }
-        console.log(componentData);
+
         // Serialize JSON
         const json = JSON.stringify(componentData, null, 2);
         // console.log(json);
@@ -500,8 +497,6 @@ export function NewSubToolbar(paperScroller, commandManager, toolbarContainerEl)
     });
     // 关闭子画布
     toolbar.on('close:pointerclick', () => {
-        console.log(subElements);
-
         const subElementsToRemove = subGraph.getCells().filter(cell => {
             cell.attributes.classType !== 'Component'
         });

@@ -14,6 +14,7 @@ const stencilArchitectures = [
         // FPrime架构
         type: 'standard.Path',
         isArchitecture: true, // 标记为架构类型
+        componentName: "FPrimeArchitecture", // 用于搜索
         size: { width: 40, height: 130 },
         attrs: {
             body: {
@@ -106,6 +107,7 @@ const outputPortConfig = {
 const componentConfig = {
     type: 'standard.Path',
     isComponent: true,
+    componentName: "Component",
     size: { width: 50, height: 100 },
     attrs: {
         body: {
@@ -181,7 +183,6 @@ function createLibComponentElements(componentNames) {
     }));
 
     libComponents = components;
-    console.log('组件库加载成功:', libComponents);
     return components;
 }
 
@@ -292,7 +293,7 @@ function createLibComponentSubElements(componentData, componentId) {
         subElements.set(componentId, subElementsInstances);
     }
 
-    return { subElementsInstances, links };
+    // return { subElementsInstances, links };
 }
 
 /**
@@ -321,9 +322,7 @@ function handleLibComponentDragDrop(clone, cloneArea, { graph }) {
                 graph.addCell(component);
 
                 // 创建子元素和连接
-                const { subElementsInstances } = createLibComponentSubElements(componentData, component.id);
-
-                console.log('已创建库组件及子元素:', component.id, subElementsInstances);
+                createLibComponentSubElements(componentData, component.id);
             } else {
                 console.error('获取组件详情失败:', data.message);
             }
@@ -334,7 +333,7 @@ function handleLibComponentDragDrop(clone, cloneArea, { graph }) {
 }
 
 /**
- * 创建新的模具工具栏
+ * 创建新的元素选盘工具栏
  * @param {Object} graph 图表对象
  * @param {Object} paper 画布对象
  * @param {Object} cellNamespace 单元视图命名空间
@@ -347,6 +346,18 @@ export function NewStencil(graph, paper, cellNamespace, stencilContainerEl, insp
         paper,
         width: 100,
         height: "100%",
+        search: function(element, keyword, groupId, stencil) {
+            if (keyword === "") {
+                return true;
+            }
+            if (element.attributes.type&&element.attributes.type.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
+                return true;
+            }
+            if (element.attributes.componentName&&element.attributes.componentName.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
+                return true;
+            }
+            return false;
+        },
         paperOptions: () => ({
             model: new dia.Graph({}, { cellNamespace }),
             cellNamespace,

@@ -24,8 +24,8 @@ const subInspectorContainer = document.getElementById('sub-inspector');
 export const subPaper = new dia.Paper({
     model: subGraph,
     cellViewNamespace: shapes,
-    width: 1600,
-    height: 1200,
+    width: 2560,
+    height: 1440,
     gridSize: 20,
     drawGrid: { name: "mesh" },
     async: true,

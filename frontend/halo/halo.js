@@ -3,7 +3,7 @@ import { ui } from '@joint/plus';
 /**
  * Halo配置常量
  */
-const HALO_CONFIGS = {
+export const HALO_CONFIGS = {
     // 基础Halo - 移除clone和fork
     basic: ['clone', 'fork'],
 
@@ -59,7 +59,7 @@ function openSubHalo(cellView) {
  * @param {Array} handleToRemove - 要移除的句柄列表
  * @returns {Object} 创建的Halo实例
  */
-function createHalo(cellView, handleToRemove) {
+export function createHalo(cellView, handleToRemove) {
     const halo = new ui.Halo({
         cellView: cellView
     });

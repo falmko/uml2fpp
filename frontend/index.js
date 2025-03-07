@@ -21,7 +21,7 @@ import { NewCommandManager } from './command_manager/command_manager';
 import { NewPaperScroller } from './paper_scroller/paper_scroller';
 import { CustomLink, customRouter, CustomValidateConnection } from './link/link';
 import { subElements } from './subgraph/subgraph';
-import { menuTreeManager } from './menu_tree/menu_tree';
+import { menuTreeManager, NewMenuTreeManager } from './menu_tree/menu_tree';
 
 shapes.UMLClass = UMLClass;
 shapes.UMLClassView = shapes.standard.HeaderedRecordView;
@@ -44,13 +44,14 @@ const paperContainerEl = document.getElementById("paper");
 const stencilContainerEl = document.getElementById("stencil");
 const toolbarContainerEl = document.getElementById("toolbar");
 const inspectorContainer = document.getElementById('inspector');
+const menuTreeContainer = document.getElementById('component-tree');
 
 // Paper
 // -----
 const paper = new dia.Paper({
     model: graph,
     cellViewNamespace: shapes,
-    width: 2000,
+    width: 2560,
     height: 1440,
     gridSize: 20,
     drawGrid: { name: "mesh" },
@@ -77,6 +78,9 @@ NewToolbar(paperScroller, commandManager, toolbarContainerEl);
 NewStencil(graph, paper, shapes, stencilContainerEl, inspectorContainer);
 NewPortMoveTool(paper, inspectorContainer);
 NewInspector(paper, inspectorContainer);
+// 初始化menu_tree
+NewMenuTreeManager(graph,paper,paperScroller,null,menuTreeContainer);
+
 
 // listen delete event and remove the element from subElements
 graph.on('remove', function (cell) {
@@ -89,7 +93,6 @@ graph.on('remove', function (cell) {
 });
 // 监听graph的add、remove事件，更新menu_tree
 graph.on('add', function (cell) {
-    console.log(cell);
     if (cell.attributes.classType) {
         const classType = cell.attributes.classType;
         const id = cell.id;

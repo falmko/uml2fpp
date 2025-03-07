@@ -2,21 +2,33 @@
  * MenuTreeManager 类
  * 负责管理树形菜单的数据结构、渲染和交互
  */
-class MenuTreeManager {
+import { highlighters } from "@joint/plus";
+import { createHalo,HALO_CONFIGS } from "../halo/halo";
+export class MenuTreeManager {
     /**
      * 构造函数
      * @param {Object} initialData - 初始树形数据
      * @param {HTMLElement} menuTreeContainer - 菜单容器DOM元素
      */
-    constructor(initialData, menuTreeContainer) {
+    constructor(graph, paper, paperScroller, initialData, menuTreeContainer) {
         this._data = initialData || {};
         this._listeners = new Set();
         this._expandedNodes = new Map();
         this._treeContainer = menuTreeContainer;
+
+        this._graph = graph;
+        this._paper = paper;
+        this._paperScroller = paperScroller;
+
+        // 添加当前高亮状态跟踪
+        this._currentHighlightedCell = null;
+
+        // 添加全局点击事件监听，用于取消高亮
+        document.addEventListener('click', this._handleDocumentClick.bind(this));
     }
 
     // ===== 数据操作方法 =====
-    
+
     /**
      * 获取当前树数据
      * @return {Object} 树数据
@@ -62,10 +74,10 @@ class MenuTreeManager {
      */
     deleteData(path) {
         const parts = path.split('.');
-        
+
         // 处理边缘情况
         if (parts.length === 0) return;
-        
+
         // 根级别删除的简化处理
         if (parts.length === 1) {
             delete this._data[parts[0]];
@@ -83,10 +95,10 @@ class MenuTreeManager {
 
         // 根据父对象类型执行删除操作
         this._deleteFromParent(parent, lastKey);
-        
+
         // 清理删除后产生的空对象
         this._cleanupEmptyObjects(parentPath);
-        
+
         this._notifyListeners();
     }
 
@@ -98,14 +110,14 @@ class MenuTreeManager {
      */
     _getObjectAtPath(pathParts) {
         let current = this._data;
-        
+
         for (const key of pathParts) {
             if (!(key in current)) {
                 return null;
             }
             current = current[key];
         }
-        
+
         return current;
     }
 
@@ -242,6 +254,29 @@ class MenuTreeManager {
         this._treeContainer.appendChild(treeList);
     }
 
+    // 处理文档点击事件，用于取消高亮
+    _handleDocumentClick(event) {
+        // 如果点击的不是树节点，则清除高亮
+        if (!event.target.closest('.tree-text')) {
+            this._removeHighlight();
+        }
+    }
+
+    // 移除当前高亮
+    _removeHighlight() {
+        if (this._currentHighlightedCell) {
+            try {
+                const cellView = this._currentHighlightedCell.findView(this._paper);
+                if (cellView) {
+                    highlighters.mask.remove(cellView, 'my-element-highlight');
+                }
+            } catch (e) {
+                console.log('移除高亮失败:', e);
+            }
+            this._currentHighlightedCell = null;
+        }
+    }
+
     /**
      * 创建单个树节点
      * @param {string} name - 节点名称
@@ -256,20 +291,20 @@ class MenuTreeManager {
         listItem.dataset.path = nodePath;
 
         // 创建标签容器
-        const labelDiv = this._createLabelDiv(name, data);
+        const labelDiv = this._createLabelDiv(name, data, nodePath);
         listItem.appendChild(labelDiv);
 
         // 处理有子节点的情况
         if (this._hasChildren(data)) {
             const childList = this._createChildList(data, nodePath);
-            
+
             if (childList.childNodes.length > 0) {
                 listItem.appendChild(childList);
-                
+
                 // 添加展开/折叠功能
                 const toggle = labelDiv.querySelector('.tree-toggle');
                 this._setupToggleListener(toggle, labelDiv, childList, nodePath);
-                
+
                 // 如果节点之前是展开的，恢复展开状态
                 if (this._expandedNodes.has(nodePath)) {
                     childList.style.display = 'block';
@@ -288,7 +323,7 @@ class MenuTreeManager {
      * @return {HTMLElement} 标签div元素
      * @private
      */
-    _createLabelDiv(name, data) {
+    _createLabelDiv(name, data, nodePath) {
         const labelDiv = document.createElement('div');
         labelDiv.className = 'tree-label';
 
@@ -306,6 +341,48 @@ class MenuTreeManager {
         text.textContent = data.name || name;
         labelDiv.appendChild(text);
 
+        // 添加点击事件处理，高亮对应图元
+        text.addEventListener('click', (event) => {
+            event.stopPropagation(); // 防止触发折叠事件
+            const idPath = data.id || nodePath;
+
+            // 先移除现有高亮
+            this._removeHighlight();
+
+            if (!idPath.includes('.')) {
+                return;
+            }
+
+            // 尝试从路径中提取UUID格式的ID
+            const uuidPattern = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i;
+            const uuidMatches = idPath.match(uuidPattern);
+
+            if (uuidMatches && uuidMatches.length > 0) {
+                const elementId = uuidMatches[0];
+                const cell = this._graph.getCell(elementId);
+
+                if (cell) {
+                    const cellView = cell.findView(this._paper);
+                    if (cellView) {
+                        // 添加高亮并保存当前高亮的单元格
+                        highlighters.mask.add(cellView, { selector: 'body' }, 'my-element-highlight', {
+                            deep: true,
+                            attrs: {
+                                'stroke': '#FF4365',
+                                'stroke-width': 3
+                            }
+                        });
+                        this._currentHighlightedCell = cell;
+
+                        // 滚动到元素位置
+                        this._paperScroller.centerElement(cell);
+                        // 打开Halo面板
+                        createHalo(cellView, HALO_CONFIGS.basic);
+                    }
+                }
+            }
+        });
+
         return labelDiv;
     }
 
@@ -322,7 +399,7 @@ class MenuTreeManager {
         childList.style.display = 'none';
 
         this._buildChildNodes(childList, data, parentPath);
-        
+
         return childList;
     }
 
@@ -359,7 +436,7 @@ class MenuTreeManager {
         return data && typeof data === 'object' && (
             Array.isArray(data) ||
             (Object.keys(data).length > 0 &&
-             Object.keys(data).some(k => k !== 'name' && k !== 'id'))
+                Object.keys(data).some(k => k !== 'name' && k !== 'id'))
         );
     }
 
@@ -409,13 +486,19 @@ class MenuTreeManager {
     }
 }
 
+export var menuTreeManager = null;
+
 // 初始化菜单树管理器
-const menuTreeContainer = document.getElementById('component-tree');
-export const menuTreeManager = new MenuTreeManager({}, menuTreeContainer);
-menuTreeManager.render();
-menuTreeManager.addListener(() => {
+export function NewMenuTreeManager(graph, paper, paperScroller, initialData, menuTreeContainer) {
+    menuTreeManager = new MenuTreeManager(graph, paper, paperScroller, initialData, menuTreeContainer);
     menuTreeManager.render();
-});
+    menuTreeManager.addListener(() => {
+        menuTreeManager.render();
+    });
+}
+
+
+
 
 // initialData 示例
 // const initialData = {
