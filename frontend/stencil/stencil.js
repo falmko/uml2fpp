@@ -7,25 +7,29 @@ import { showPortInspector } from '../inspectors/inspectors';
 import { createFprimeArchitectureLayout } from '../shapes/fprime_architecture';
 import { subElements } from '../subgraph/subgraph';
 import { createSubElement, elementTypes } from '../subgraph/subgraph';
+import { showNotification } from '../notification/notification';
 
 // 元素配置数据
 const stencilArchitectures = [
     {
         // FPrime架构
-        type: 'standard.Path',
+        type: 'standard.Image',
         isArchitecture: true, // 标记为架构类型
         componentName: "FPrimeArchitecture", // 用于搜索
-        size: { width: 40, height: 130 },
+        size: { width: 70, height: 60 },
         attrs: {
             body: {
                 d: "M 51.2 97.28 a 46.08 46.08 90 1 0 0 -92.16 a 46.08 46.08 90 0 0 0 92.16 z M 40.96 34.0684 v -13.312 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 18.432 c 0.5632 0 1.024 0.4608 1.024 1.024 v 13.312 a 1.024 1.024 90 0 1 -1.024 1.024 H 41.984 a 1.024 1.024 90 0 1 -1.024 -1.024 z m 6.7482 14.9964 H 30.6176 a 1.024 1.024 90 0 0 -1.024 1.024 v 12.4724 a 2.5088 2.5088 90 1 1 -5.0176 0 V 45.4348 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 22.1082 a 1.024 1.024 90 0 0 1.024 -1.024 v -4.3264 a 2.5088 2.5088 90 0 1 5.0176 0 v 4.3264 c 0 0.5632 0.4608 1.024 1.024 1.024 h 21.5962 c 0.5632 0 1.024 0.4608 1.024 1.024 v 17.1264 a 2.5088 2.5088 90 1 1 -5.0176 0 V 50.089 a 1.024 1.024 90 0 0 -1.024 -1.024 h -16.5786 a 1.024 1.024 90 0 0 -1.024 1.024 v 12.4724 a 2.5088 2.5088 90 0 1 -5.0176 0 V 50.089 a 1.024 1.024 90 0 0 -1.024 -1.024 z m 19.6762 27.7094 v -8.192 c 0 -0.5632 0.4556 -1.024 1.024 -1.024 h 13.312 c 0.5632 0 1.024 0.4608 1.024 1.024 v 8.192 a 1.024 1.024 90 0 1 -1.024 1.024 h -13.312 a 1.024 1.024 90 0 1 -1.024 -1.024 z m -23.6492 0 v -8.192 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 13.312 c 0.5632 0 1.024 0.4608 1.024 1.024 v 8.192 a 1.024 1.024 90 0 1 -1.024 1.024 h -13.312 a 1.024 1.024 90 0 1 -1.024 -1.024 z m -24.2228 0 v -8.192 c 0 -0.5632 0.4608 -1.024 1.024 -1.024 h 13.312 c 0.5632 0 1.024 0.4608 1.024 1.024 v 8.192 a 1.024 1.024 90 0 1 -1.024 1.024 h -13.312 a 1.024 1.024 90 0 1 -1.024 -1.024 z",
                 fill: "#000000"
             },
+            image: {
+                xlinkHref: 'http://localhost:5000/image/fprime.jpg'
+            },
             label: {
                 text: "FPrime Architecture",
                 fill: "#000000",
-                x: 50,
-                y: 120,
+                x: 40,
+                y: 64,
             }
         }
     }
@@ -130,9 +134,6 @@ const defaultElements = [
     componentConfig,
 ];
 
-// 组件库集合
-let libComponents = [];
-
 /**
  * 从后端获取组件库
  * @returns {Promise<Array>} 组件库元素数组
@@ -141,18 +142,43 @@ async function loadComponentLibrary() {
     try {
         const response = await fetch('http://127.0.0.1:5000/component_lib');
         if (!response.ok) {
-            throw new Error(`HTTP error ${response.status}`);
+            // throw new Error(`HTTP error ${response.status}`);
+            console.error(`HTTP error ${response.status}`);
+            showNotification({
+                title: '加载组件库失败',
+                message: `HTTP error ${response.status}`,
+                type: 'error',
+                duration: 5000
+            })
         }
 
         const data = await response.json();
         if (data.status === 'success') {
+            showNotification({
+                title: '加载组件库成功',
+                // message: '组件库加载成功',
+                type: 'success',
+                duration: 3000
+            })
             return createLibComponentElements(data.components);
         } else {
             console.error('加载组件库失败:', data.message);
+            showNotification({
+                title: '加载组件库失败',
+                message: data.message,
+                type: 'error',
+                duration: 5000
+            })
             return [];
         }
     } catch (error) {
         console.error('加载组件库出错:', error);
+        showNotification({
+            title: '加载组件库出错',
+            message: error.message,
+            type: 'error',
+            duration: 5000
+        })
         return [];
     }
 }
@@ -182,7 +208,7 @@ function createLibComponentElements(componentNames) {
         componentName
     }));
 
-    libComponents = components;
+    // libComponents = components;
     return components;
 }
 
@@ -309,6 +335,12 @@ function handleLibComponentDragDrop(clone, cloneArea, { graph }) {
     fetch(`http://127.0.0.1:5000/component_lib/${componentName}`)
         .then(response => {
             if (!response.ok) {
+                showNotification({
+                    title: '获取组件详情失败',
+                    message: `HTTP error ${response.status}`,
+                    type: 'error',
+                    duration: 5000
+                })
                 throw new Error(`HTTP error ${response.status}`);
             }
             return response.json();
@@ -325,10 +357,22 @@ function handleLibComponentDragDrop(clone, cloneArea, { graph }) {
                 createLibComponentSubElements(componentData, component.id);
             } else {
                 console.error('获取组件详情失败:', data.message);
+                showNotification({
+                    title: '获取组件详情失败',
+                    message: data.message,
+                    type: 'error',
+                    duration: 5000
+                })
             }
         })
         .catch(error => {
             console.error('获取组件详情出错:', error);
+            showNotification({
+                title: '获取组件详情出错',
+                message: error.message,
+                type: 'error',
+                duration: 5000
+            })
         });
 }
 

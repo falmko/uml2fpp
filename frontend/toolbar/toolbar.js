@@ -4,9 +4,10 @@ import { Events } from '../shapes/events';
 import { Telemetry } from '../shapes/telemetry';
 import { Parameters } from '../shapes/parameters';
 import { Commands } from '../shapes/commands';
-import { subGraph, subElements, createSubElement,elementTypes } from '../subgraph/subgraph';
+import { subGraph, subElements, createSubElement, elementTypes } from '../subgraph/subgraph';
 import { Composition } from '../shapes/link';
 import { UMLClass } from '../shapes/shapes';
+import { showNotification } from '../notification/notification';
 
 export function getToolbar() {
     return toolbar;
@@ -44,6 +45,12 @@ export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
     toolbarContainerEl.appendChild(toolbar.render().el);
     // 导出XML
     toolbar.on('xml:pointerclick', () => {
+        showNotification({
+            title: '导出成功',
+            message: 'UML图已成功导出为XML文件',
+            type: 'success',
+            duration: 3000
+        })
         // TODO Export UML diagram to XML
 
         //     // 获取画布中的所有元素
@@ -462,9 +469,9 @@ export function NewSubToolbar(paperScroller, commandManager, toolbarContainerEl)
         }
     });
     toolbarContainerEl.appendChild(toolbar.render().el);
+
     // 保存组件到组件库
-    toolbar.on('component:pointerclick', () => {
-        // TODO 获取画布中的所有元素并导出为json文件
+    toolbar.on('component:pointerclick', async () => {
         // 获取画布中的所有元素
         const allCells = subGraph.getCells();
         // 获取组件类-子图中只有一个组件
@@ -481,20 +488,51 @@ export function NewSubToolbar(paperScroller, commandManager, toolbarContainerEl)
             }
         }
 
-        // Serialize JSON
+        // 序列化数据
         const json = JSON.stringify(componentData, null, 2);
-        // console.log(json);
-        // Download JSON file
-        const blob = new Blob([json], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${componentData.name.replace(/\s+/g, '_')}.json`;
-        document.body.appendChild(a);
-        a.click();
-        // TODO save to backend
 
+        // 保存到后端
+        try {
+            const response = await fetch('http://localhost:5000/component_lib', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: json
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // 成功保存到组件库
+                showNotification({
+                    title: '保存成功',
+                    message: `组件 ${componentData.name} 已成功保存到组件库`,
+                    type: 'success',
+                    duration: 3000
+                });
+            } else {
+                console.error('保存失败:', result.message);
+
+                // 保存失败
+                showNotification({
+                    title: '保存失败',
+                    message: `${result.message}`,
+                    type: 'error',
+                    duration: 5000
+                });
+            }
+        } catch (error) {
+            console.error('保存到后端时出错:', error);
+            showNotification({
+                title: '错误',
+                message: `保存到组件库时发生错误: ${error.message}`,
+                type: 'error',
+                duration: 5000
+            });
+        }
     });
+
     // 关闭子画布
     toolbar.on('close:pointerclick', () => {
         const subElementsToRemove = subGraph.getCells().filter(cell => {

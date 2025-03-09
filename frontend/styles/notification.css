@@ -1,0 +1,64 @@
+.custom-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 350px;
+    z-index: 9999;
+    animation: slide-in 0.3s ease-out;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    display: flex;
+    align-items: center;
+  }
+  
+  .custom-notification-success {
+    background-color: #f0f9eb;
+    border-left: 4px solid #67c23a;
+    color: #67c23a;
+  }
+  
+  .custom-notification-error {
+    background-color: #fef0f0;
+    border-left: 4px solid #f56c6c;
+    color: #f56c6c;
+  }
+  
+  .custom-notification-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .custom-notification-message {
+    color: #333;
+  }
+  
+  .custom-notification-close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    color: #909399;
+    font-size: 16px;
+  }
+  
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
