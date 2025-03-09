@@ -1,4 +1,4 @@
-import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/plus';
+import { shapes } from '@joint/plus';
 
 export function CustomLink(cellView, magnet) {
     // 检查连接是否来自端口
@@ -23,7 +23,7 @@ export function CustomLink(cellView, magnet) {
     });
 }
 
-export function CustomValidateConnection(sourceView, sourceMagnet, targetView, targetMagnet){
+export function CustomValidateConnection(sourceView, sourceMagnet, targetView, targetMagnet) {
     // 不允许自连接
     if (sourceView === targetView) {
         return false;

@@ -4,6 +4,7 @@
  */
 import { highlighters } from "@joint/plus";
 import { createHalo,HALO_CONFIGS } from "../halo/halo";
+import { createInspector, hideInspector } from "../inspectors/inspectors";
 export class MenuTreeManager {
     /**
      * 构造函数
@@ -378,6 +379,9 @@ export class MenuTreeManager {
                         this._paperScroller.centerElement(cell);
                         // 打开Halo面板
                         createHalo(cellView, HALO_CONFIGS.basic);
+                        // 打开属性面板
+                        hideInspector(this._paper);
+                        createInspector(cellView.model, this._paper);
                     }
                 }
             }

@@ -1,8 +1,8 @@
 {
     "Components": [
         {
-            "name": "Component_test",
-            "path": "Component_test.json"
+            "name": "Component123——lib",
+            "path": "components/component123——lib.json"
         }
     ]
 }

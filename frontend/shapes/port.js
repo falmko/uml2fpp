@@ -14,9 +14,10 @@ export const portKindOptions = Object.entries(PortKind).map(([key, value]) => ({
     content: key
 }));
 
-let portIdCounter = 1;
 export function generatePortId() {
-    return `P-${portIdCounter++}`;
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 6);
+    return `P-${timestamp}-${random}`;
 }
 // 端口默认属性，基于Port模型
 export function createDefaultPortProps() {
