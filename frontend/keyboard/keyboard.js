@@ -1,4 +1,4 @@
-import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/plus';
+import { ui } from '@joint/plus';
 import { getSelection } from '../selection/selection';
 
 let clipboard = null;
@@ -7,7 +7,7 @@ let keyboard = null;
 export function NewKeyboard(graph, paper) {
     clipboard = new ui.Clipboard({ useLocalStorage: false });
     keyboard = new ui.Keyboard;
-    // 
+
     keyboard.on('ctrl+c', () => clipboard.copyElements(getSelection().collection, paper.model));
     keyboard.on('ctrl+x', () => clipboard.cutElements(getSelection().collection, paper.model));
     keyboard.on('ctrl+v', () => clipboard.pasteCells(paper.model));

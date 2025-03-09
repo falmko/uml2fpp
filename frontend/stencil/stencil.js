@@ -1,9 +1,9 @@
-import { dia, shapes, ui, format, util, highlighters, mvc, V, g, layout } from '@joint/plus';
+import { dia, shapes, ui, util, highlighters } from '@joint/plus';
 import { queueFullOptions } from '../shapes/commands';
 import { portKindOptions } from '../shapes/port';
 import { componentKindOptions } from '../shapes/compoent_base';
 import { addElementPort, defaultPortsConfig } from '../port_move_tool/port_move_tool';
-import { showPortInspector } from '../inspectors/inspectors';
+import { createInspector, showPortInspector } from '../inspectors/inspectors';
 import { createFprimeArchitectureLayout } from '../shapes/fprime_architecture';
 import { subElements } from '../subgraph/subgraph';
 import { createSubElement, elementTypes } from '../subgraph/subgraph';
@@ -265,7 +265,7 @@ function createLibComponent(componentData, position) {
  * @param {Object} cloneArea 克隆区域
  * @param {Object} options 选项对象
  */
-function handlePortDragDrop(cloneView, evt, cloneArea, { graph, paper, stencil, inspectorContainer }) {
+function handlePortDragDrop(cloneView, evt, cloneArea, { graph, paper, stencil }) {
     const clone = cloneView.model;
     const { dropTarget } = evt.data;
 
@@ -279,7 +279,7 @@ function handlePortDragDrop(cloneView, evt, cloneArea, { graph, paper, stencil, 
 
         // 稍微延迟显示端口Inspector，确保DOM已更新
         setTimeout(() => {
-            showPortInspector(dropTarget, portId, inspectorContainer);
+            showPortInspector(dropTarget, portId, paper);
         }, 100);
     } else {
         // 无效的放置目标，将端口动画返回至工具栏
@@ -382,9 +382,8 @@ function handleLibComponentDragDrop(clone, cloneArea, { graph }) {
  * @param {Object} paper 画布对象
  * @param {Object} cellNamespace 单元视图命名空间
  * @param {HTMLElement} stencilContainerEl 容器元素
- * @param {HTMLElement} inspectorContainer 检查器容器
  */
-export function NewStencil(graph, paper, cellNamespace, stencilContainerEl, inspectorContainer) {
+export function NewStencil(graph, paper, cellNamespace, stencilContainerEl) {
     // 创建模具配置
     const stencil = new ui.Stencil({
         paper,
@@ -454,7 +453,7 @@ export function NewStencil(graph, paper, cellNamespace, stencilContainerEl, insp
     });
 
     // 事件处理器配置
-    const eventHandlerOptions = { graph, paper, stencil, inspectorContainer };
+    const eventHandlerOptions = { graph, paper, stencil };
 
     // 绑定事件
     stencil.on({
@@ -510,6 +509,7 @@ export function NewStencil(graph, paper, cellNamespace, stencilContainerEl, insp
                 stencil.cancelDrag();
                 const component = createBasicComponent(cloneArea.center());
                 graph.addCell(component);
+                createInspector(component, paper);
             } else if (evt.data.isLibComponent) {
                 // 处理从组件库拖拽的组件
                 stencil.cancelDrag();

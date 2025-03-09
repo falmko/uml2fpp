@@ -1,4 +1,4 @@
-import { dia, shapes, ui, format, util, highlighters, mvc, V, g } from '@joint/plus';
+import { ui } from '@joint/plus';
 
 export function NewPaperScroller(paper, paperContainerEl) {
     const paperScroller = new ui.PaperScroller({

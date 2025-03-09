@@ -1,17 +1,9 @@
 import { ui } from '@joint/plus';
 import { selection } from '../selection/selection';
-import { Events } from '../shapes/events';
-import { Telemetry } from '../shapes/telemetry';
-import { Parameters } from '../shapes/parameters';
-import { Commands } from '../shapes/commands';
 import { subGraph, subElements, createSubElement, elementTypes } from '../subgraph/subgraph';
-import { Composition } from '../shapes/link';
 import { UMLClass } from '../shapes/shapes';
 import { showNotification } from '../notification/notification';
 
-export function getToolbar() {
-    return toolbar;
-}
 export function NewToolbar(paperScroller, commandManager, toolbarContainerEl) {
     toolbar = new ui.Toolbar({
         autoToggle: true,

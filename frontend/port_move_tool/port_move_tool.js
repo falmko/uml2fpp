@@ -1,5 +1,5 @@
 import { dia, util, mvc, V, g } from '@joint/plus';
-import { getCurrentInspectors, setCurrentInspectors, showPortInspector } from '../inspectors/inspectors';
+import { hideInspector, showPortInspector } from '../inspectors/inspectors';
 import { portColors, generatePortId, createDefaultPortProps } from '../shapes/port';
 
 export function addElementPort(element, port, position) {
@@ -261,7 +261,7 @@ export const Ports = dia.ToolView.extend({
     }
 });
 
-export function NewPortMoveTool(paper, inspectorContainer) {
+export function NewPortMoveTool(paper) {
     // paperContainerEl.appendChild(paper.el);
     // 监听点击端口事件，添加端口工具
     paper.on("element:magnet:pointerclick", (elementView, evt, magnet) => {
@@ -272,23 +272,14 @@ export function NewPortMoveTool(paper, inspectorContainer) {
         const portId = magnet.getAttribute('port');
         if (!portId) return;
 
-        // 清除当前Inspector
-        if (getCurrentInspectors()) {
-            inspectorContainer.style.display = 'none';
-            setCurrentInspectors(null);
-        }
-
         // 显示端口Inspector
-        showPortInspector(elementView.model, portId, inspectorContainer);
+        showPortInspector(elementView.model, portId,paper);
     });
     // 监听点击空白处事件，移除所有工具
     paper.on("blank:pointerdown cell:pointerdown", () => {
         paper.removeTools();
         // 清除当前Inspector
-        if (getCurrentInspectors()) {
-            inspectorContainer.style.display = 'none';
-            setCurrentInspectors(null);
-        }
+        hideInspector(paper);
     });
 }
 
