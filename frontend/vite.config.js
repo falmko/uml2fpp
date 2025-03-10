@@ -4,5 +4,6 @@ export default {
         host: '0.0.0.0',
         open: false,
         port: 3000,
-    }
+    },
+    publicDir: 'public',
 }

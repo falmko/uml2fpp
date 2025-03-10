@@ -1,7 +1,7 @@
 import { dia, shapes } from '@joint/plus';
 
-import './styles/joint-plus.css';
-import './styles/styles.css';
+import './public/styles/joint-plus.css';
+import './public/styles/styles.css';
 import { UMLClass } from './shapes/shapes'
 import { Telemetry } from './shapes/telemetry';
 import { Events } from './shapes/events';

@@ -23,7 +23,7 @@ const stencilArchitectures = [
                 fill: "#000000"
             },
             image: {
-                xlinkHref: 'http://localhost:5000/image/fprime.jpg'
+                xlinkHref: 'icons/fprime.jpg'
             },
             label: {
                 text: "FPrime Architecture",

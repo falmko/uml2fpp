@@ -1,4 +1,4 @@
 /node_modules
 package-lock.json
 joint-plus.tgz
-styles/joint-plus.css
+public/styles/joint-plus.css

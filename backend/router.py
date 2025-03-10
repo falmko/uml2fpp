@@ -129,27 +129,6 @@ def get_component_detail(component_name):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# 获取图片
-@app.route("/image/<path:image_name>", methods=["GET"])
-def get_image(image_name):
-    try:
-        # 假设图片存储在 images 目录下，根据需要调整路径
-        images_directory = "image"
-
-        # 检查图片是否存在
-        image_path = os.path.join(images_directory, image_name)
-        if not os.path.isfile(image_path):
-            return (
-                jsonify({"status": "error", "message": f"图片 {image_name} 不存在"}),
-                404,
-            )
-
-        # 返回图片文件
-        return send_from_directory(images_directory, image_name)
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
 # 启动应用
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
