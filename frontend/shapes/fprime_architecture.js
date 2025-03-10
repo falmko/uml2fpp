@@ -1,4 +1,4 @@
-import { dia, shapes, ui, format, util } from '@joint/plus';
+import { util } from '@joint/plus';
 import { ComponentBase } from './compoent_base';
 import { defaultPortsConfig } from '../port_move_tool/port_move_tool';
 
@@ -6,7 +6,7 @@ export class FprimeArchitectureComponent extends ComponentBase {
     defaults() {
         return {
             ...super.defaults(),
-            type: "FprimeArchitecture",
+            type: "FprimeArchitectureComponent",
             size: { width: 260 },
             outlineColor: "#707070",
             color: "#f0f0f0",

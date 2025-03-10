@@ -22,6 +22,7 @@ import { NewPaperScroller } from './paper_scroller/paper_scroller';
 import { CustomLink, customRouter, CustomValidateConnection } from './link/link';
 import { subElements } from './subgraph/subgraph';
 import { menuTreeManager, NewMenuTreeManager } from './menu_tree/menu_tree';
+import { FprimeArchitectureComponent } from './shapes/fprime_architecture';
 
 // 注册自定义组件到shapes对象
 function registerCustomShapes() {
@@ -40,6 +41,7 @@ function registerCustomShapes() {
     shapes.CommandsView = shapes.standard.HeaderedRecordView;
     shapes.InputPort = InputPort;
     shapes.OutputPort = OutputPort;
+    shapes.FprimeArchitectureComponent = FprimeArchitectureComponent;
 }
 
 // 纸张配置

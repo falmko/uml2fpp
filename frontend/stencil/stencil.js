@@ -328,8 +328,9 @@ function createLibComponentSubElements(componentData, componentId) {
  * @param {Object} cloneArea 克隆区域
  * @param {Object} options 选项对象
  */
-function handleLibComponentDragDrop(clone, cloneArea, { graph }) {
+function handleLibComponentDragDrop(clone, cloneArea, options = {}) {
     const componentName = clone.get('componentName');
+    const { graph, paper } = options;
 
     // 获取组件详细信息
     fetch(`http://127.0.0.1:5000/component_lib/${componentName}`)
@@ -348,13 +349,21 @@ function handleLibComponentDragDrop(clone, cloneArea, { graph }) {
         .then(data => {
             if (data.status === 'success') {
                 const componentData = data.data;
-
                 // 创建组件实例并添加到图表
                 const component = createLibComponent(componentData, cloneArea.center());
-                graph.addCell(component);
-
+                
+                // 如果有graph，直接添加到图表
+                if (graph) {
+                    graph.addCell(component);
+                }
+                
                 // 创建子元素和连接
                 createLibComponentSubElements(componentData, component.id);
+                
+                // 如果有paper，显示Inspector
+                if (paper) {
+                    createInspector(component, paper);
+                }
             } else {
                 console.error('获取组件详情失败:', data.message);
                 showNotification({
@@ -389,14 +398,14 @@ export function NewStencil(graph, paper, cellNamespace, stencilContainerEl) {
         paper,
         width: 100,
         height: "100%",
-        search: function(element, keyword, groupId, stencil) {
+        search: function (element, keyword, groupId, stencil) {
             if (keyword === "") {
                 return true;
             }
-            if (element.attributes.type&&element.attributes.type.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
+            if (element.attributes.type && element.attributes.type.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
                 return true;
             }
-            if (element.attributes.componentName&&element.attributes.componentName.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
+            if (element.attributes.componentName && element.attributes.componentName.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
                 return true;
             }
             return false;
