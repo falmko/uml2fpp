@@ -17,6 +17,10 @@ export enum PortKind {
 // TODO import_serializable_type, import_enum_type, import_array_type, include_header
 // 每个 Component 的端口集定义了它与外界交互的方式，即它的外部接口。
 // 因此，正确理解和设计这些端口对于系统的成功至关重要。
+/**
+ * Port类
+ * 代表系统中的一个端口，包含端口的基本属性、参数列表和返回值类型等信息
+ */
 export class Port {
     // 以下部分为端口的基本属性，需要集成在Component中，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 端口名称 */

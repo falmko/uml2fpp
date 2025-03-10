@@ -1,5 +1,11 @@
 import { shapes } from '@joint/plus';
 
+/**
+ * 创建并返回自定义的连线对象
+ * @param {Object} cellView - JointJS cellView实例
+ * @param {HTMLElement} magnet - 连接点的DOM元素
+ * @returns {shapes.standard.Link|shapes.Composition} 自定义的连线对象
+ */
 export function CustomLink(cellView, magnet) {
     // 检查连接是否来自端口
     if (magnet) {
@@ -23,6 +29,14 @@ export function CustomLink(cellView, magnet) {
     });
 }
 
+/**
+ * 验证连接的有效性
+ * @param {Object} sourceView - 源cellView实例
+ * @param {HTMLElement} sourceMagnet - 源连接点的DOM元素
+ * @param {Object} targetView - 目标cellView实例
+ * @param {HTMLElement} targetMagnet - 目标连接点的DOM元素
+ * @returns {boolean} 连接是否有效
+ */
 export function CustomValidateConnection(sourceView, sourceMagnet, targetView, targetMagnet) {
     // 不允许自连接
     if (sourceView === targetView) {
@@ -61,6 +75,10 @@ export function CustomValidateConnection(sourceView, sourceMagnet, targetView, t
     return true;
 }
 
+/**
+ * 自定义路由器配置
+ * 定义了连线的路由方式和参数
+ */
 export const customRouter = {
     name: 'orthogonal',
     args: {

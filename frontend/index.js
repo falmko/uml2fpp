@@ -24,6 +24,10 @@ import { subElements } from './subgraph/subgraph';
 import { menuTreeManager, NewMenuTreeManager } from './menu_tree/menu_tree';
 
 // 注册自定义组件到shapes对象
+/**
+ * 注册自定义图形到shapes对象
+ * 该函数将自定义的UMLClass、Telemetry、Events、Composition、ComponentBase、Parameters、Commands、InputPort和OutputPort图形注册到shapes对象中
+ */
 function registerCustomShapes() {
     shapes.UMLClass = UMLClass;
     shapes.UMLClassView = shapes.standard.HeaderedRecordView;
@@ -43,6 +47,10 @@ function registerCustomShapes() {
 }
 
 // 纸张配置
+/**
+ * 纸张配置常量
+ * 定义了图表的宽度、高度、网格大小、背景颜色、默认连接线、默认路由器、默认连接点等配置
+ */
 const PAPER_CONFIG = {
     width: 2560,
     height: 1440,

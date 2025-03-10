@@ -14,12 +14,20 @@ export const portKindOptions = Object.entries(PortKind).map(([key, value]) => ({
     content: key
 }));
 
+/**
+ * 生成唯一的端口ID
+ * @returns {string} 生成的端口ID
+ */
 export function generatePortId() {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substring(2, 6);
     return `P-${timestamp}-${random}`;
 }
-// 端口默认属性，基于Port模型
+
+/**
+ * 创建默认的端口属性
+ * @returns {Object} 默认的端口属性对象
+ */
 export function createDefaultPortProps() {
     return {
         name: generatePortId(),      // 端口名称
@@ -35,6 +43,10 @@ export function createDefaultPortProps() {
     };
 }
 
+/**
+ * 端口颜色常量
+ * 定义了不同类型端口的颜色
+ */
 export const portColors = {
     'SYNC_INPUT': '#ff9580',     // 同步输入端口为红色
     'GUARDED_INPUT': '#ffc880',  // 保护输入端口为橙色
@@ -42,5 +54,14 @@ export const portColors = {
     'OUTPUT': '#80ff95'          // 输出端口为绿色
 };
 
+/**
+ * InputPort类
+ * 代表输入端口，继承自JointJS的Rectangle形状
+ */
 export class InputPort extends shapes.standard.Rectangle { }
+
+/**
+ * OutputPort类
+ * 代表输出端口，继承自JointJS的Polygon形状
+ */
 export class OutputPort extends shapes.standard.Polygon { }

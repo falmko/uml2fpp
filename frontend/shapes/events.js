@@ -3,11 +3,19 @@ import { UMLClass } from './shapes';
 import { Severity } from '../models/event';
 import { fppTypeOptions } from './telemetry';
 
+/**
+ * severityOptions常量
+ * 定义了事件严重程度的选项
+ */
 export const severityOptions = Object.entries(Severity).map(([key, value]) => ({
     value: key,
     content: value
 }));
 
+/**
+ * Events类
+ * 代表系统中的一组事件，包含事件的基本属性、事件列表等信息
+ */
 export class Events extends UMLClass {
     defaults() {
         return {

@@ -1,5 +1,10 @@
 import { dia, shapes, ui, format, util } from '@joint/plus';
 
+// 定义可见性选项
+/**
+ * visibilityOptions常量
+ * 定义了可见性的选项
+ */
 export const visibilityOptions = [
     {
         value: "+",
@@ -22,6 +27,12 @@ export const visibilityOptions = [
         content: "Package"
     }
 ];
+
+// 定义类型选项
+/**
+ * typeOptions常量
+ * 定义了数据类型的选项
+ */
 export const typeOptions = [
     {
         value: 0,
@@ -53,6 +64,11 @@ export const typeOptions = [
     }
 ];
 
+// 定义UML类
+/**
+ * UMLClass类
+ * 代表UML类图中的一个类，包含类的基本属性、方法和操作等信息
+ */
 export class UMLClass extends shapes.standard.HeaderedRecord {
     defaults() {
         return {
@@ -227,4 +243,3 @@ export class UMLClass extends shapes.standard.HeaderedRecord {
               </svg>`)}`;
     }
 }
-
