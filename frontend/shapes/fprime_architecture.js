@@ -2,6 +2,10 @@ import { util } from '@joint/plus';
 import { ComponentBase } from './compoent_base';
 import { defaultPortsConfig } from '../port_move_tool/port_move_tool';
 
+/**
+ * FprimeArchitectureComponent类
+ * 代表Fprime架构中的一个组件，继承自ComponentBase类
+ */
 export class FprimeArchitectureComponent extends ComponentBase {
     defaults() {
         return {
@@ -78,6 +82,11 @@ export class FprimeArchitectureComponent extends ComponentBase {
     }
 }
 
+/**
+ * 创建Fprime架构布局
+ * @param {Object} position - 布局的起始位置
+ * @returns {Array} 创建的组件数组
+ */
 export function createFprimeArchitectureLayout(position) {
     // 配置参数
     const columnWidth = 260;   // 组件宽度

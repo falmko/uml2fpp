@@ -10,6 +10,10 @@ export enum ComponentKind {
     QUEUED = "QUEUED",     // 有队列无线程
 }
 
+/**
+ * Component类
+ * 代表系统中的一个组件，包含组件的基本属性、端口、遥测、参数、事件和命令等信息
+ */
 export class Component {
     // 以下部分为组件的基本属性，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 组件名称 */

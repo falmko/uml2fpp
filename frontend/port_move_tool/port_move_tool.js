@@ -2,6 +2,13 @@ import { dia, util, mvc, V, g } from '@joint/plus';
 import { hideInspector, showPortInspector } from '../inspectors/inspectors';
 import { portColors, generatePortId, createDefaultPortProps } from '../shapes/port';
 
+/**
+ * 添加端口到元素
+ * @param {Object} element - JointJS元素实例
+ * @param {Object} port - 端口对象
+ * @param {Object} position - 端口位置
+ * @returns {string} 生成的端口ID
+ */
 export function addElementPort(element, port, position) {
     // 从port.properties合并可能存在的属性
     const portId = generatePortId()
@@ -82,6 +89,10 @@ const PortHandle = mvc.View.extend({
     }
 });
 
+/**
+ * Ports类
+ * 负责管理和渲染元素的端口
+ */
 export const Ports = dia.ToolView.extend({
     name: "ports",
     options: {
@@ -261,6 +272,10 @@ export const Ports = dia.ToolView.extend({
     }
 });
 
+/**
+ * 初始化端口移动工具
+ * @param {Object} paper - JointJS paper实例
+ */
 export function NewPortMoveTool(paper) {
     // paperContainerEl.appendChild(paper.el);
     // 监听点击端口事件，添加端口工具
@@ -283,6 +298,10 @@ export function NewPortMoveTool(paper) {
     });
 }
 
+/**
+ * 默认端口配置
+ * 定义了端口组和端口项的默认属性
+ */
 export const defaultPortsConfig = {
     groups: {
         absolute: {

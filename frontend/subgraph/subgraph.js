@@ -48,10 +48,16 @@ const CLASS_MAPPING = {
     'Commands': { class: Commands, dataKey: 'Commands', dataField: 'commands' }
 };
 
-// 存储组件状态
+/**
+ * 存储组件状态
+ * 使用Map对象存储组件的子元素和连接信息
+ */
 export const subElements = new Map();
 
-// 子画布初始化
+/**
+ * 子画布初始化
+ * 创建并返回一个新的JointJS图表实例
+ */
 export const subGraph = new dia.Graph({}, { cellNamespace: shapes });
 
 // DOM 元素引用
@@ -61,6 +67,7 @@ const subInspectorContainer = document.getElementById('sub-inspector');
 
 /**
  * 初始化子画布及相关组件
+ * @returns {Object} 包含子画布实例的对象
  */
 function initializeSubPaper() {
     // 创建画布

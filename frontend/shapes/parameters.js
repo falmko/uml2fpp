@@ -2,6 +2,10 @@ import { dia, shapes, ui, format, util } from '@joint/plus';
 import { UMLClass } from './shapes';
 import { fppTypeOptions } from './telemetry';
 
+/**
+ * Parameters类
+ * 代表系统中的一组参数，包含参数的基本属性、参数ID基础值、操作码基础值和参数列表等信息
+ */
 export class Parameters extends UMLClass {
     defaults() {
         return {

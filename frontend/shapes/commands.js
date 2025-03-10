@@ -4,17 +4,29 @@ import { CommandKind, QueueFull } from '../models/command';
 import { fppTypeOptions } from './telemetry';
 
 // 创建命令类型选项
+/**
+ * commandKindOptions常量
+ * 定义了命令类型的选项
+ */
 export const commandKindOptions = Object.entries(CommandKind).map(([key, value]) => ({
     value: key,
     content: value
 }));
 
 // 创建队列满处理选项
+/**
+ * queueFullOptions常量
+ * 定义了队列满时的处理选项
+ */
 export const queueFullOptions = Object.entries(QueueFull).map(([key, value]) => ({
     value: key,
     content: value
 }));
 
+/**
+ * Commands类
+ * 代表系统中的一组命令，包含命令的基本属性、命令列表等信息
+ */
 export class Commands extends UMLClass {
     defaults() {
         return {

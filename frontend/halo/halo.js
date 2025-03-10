@@ -2,6 +2,7 @@ import { ui } from '@joint/plus';
 
 /**
  * Halo配置常量
+ * 定义了不同类型的Halo配置
  */
 export const HALO_CONFIGS = {
     // 基础Halo - 移除clone和fork

@@ -5,6 +5,11 @@
 import { highlighters } from "@joint/plus";
 import { createHalo,HALO_CONFIGS } from "../halo/halo";
 import { createInspector, hideInspector } from "../inspectors/inspectors";
+
+/**
+ * MenuTreeManager 类
+ * 负责管理树形菜单的数据结构、渲染和交互
+ */
 export class MenuTreeManager {
     /**
      * 构造函数

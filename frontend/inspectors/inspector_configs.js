@@ -8,6 +8,10 @@ import { PortKind } from '../models/port';
 import { passByOptions } from '../shapes/port';
 
 // Inspector配置对象
+/**
+ * InspectorConfigs常量
+ * 定义了不同类型元素的Inspector配置
+ */
 export const InspectorConfigs = {
     'Component': {
         tabs: ['general'],

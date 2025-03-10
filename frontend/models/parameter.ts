@@ -2,6 +2,10 @@ import { FppType } from '../types/types';
 
 // 参数用于在嵌入式系统中存储非易失性状态。
 // F' 提供了代码生成功能来管理和持久化这些参数。
+/**
+ * Parameter接口
+ * 代表系统中的一个参数，包含参数的基本属性、数据类型、默认值、描述注释和命令操作码等信息
+ */
 export interface Parameter {
     /** 参数ID */
     id: number;
@@ -28,6 +32,10 @@ export interface Parameter {
     save_opcode: number;
 }
 
+/**
+ * Parameters类
+ * 代表系统中的一组参数，包含参数的基本属性、参数ID基础值、操作码基础值和参数列表等信息
+ */
 export class Parameters {
     // 以下部分为参数的基本属性，需要集成在Component中，参见 fprime/Autocoders/Python/templates/ExampleComponentAi.xml
     /** 参数ID基础值（可选） */
